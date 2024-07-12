@@ -10,6 +10,7 @@ library(data.table)
 library(rxnorm)
 library(foreach)
 library(doFuture)
+library(furrr)
 
 opioids <- readRDS("data/public/ndc_to_atc_opioids.rds")
 
@@ -20,6 +21,7 @@ strength <- foreach(code = opioids[, rxcui]) %dofuture% {
 }
 
 opioids[, strength := strength]
+opioids[, dose_form := future_map_chr(opioids$rxcui, get_dose_form, local_host = TRUE)]
 
 plan(sequential)
 
