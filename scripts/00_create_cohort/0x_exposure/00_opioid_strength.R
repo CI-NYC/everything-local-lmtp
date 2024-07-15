@@ -1,8 +1,8 @@
 # -------------------------------------
-# Script: 
+# Script: 00_opioid_strength.R
 # Author: Nick Williams
 # Updated:
-# Purpose: 
+# Purpose: Add strength and dose form to NDC lookup table for opioids
 # Notes:
 # -------------------------------------
 
