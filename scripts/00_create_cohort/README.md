@@ -31,15 +31,15 @@ In the exposure period, define 2 variables: A1, A2
 
 - ~~A1: MME (max)~~
 
-- A2: days supply (max)
+- ~~A2: days supply (max)~~
 
 Truncate these variables to limit outliers.
 
 In addition, define 3 subsets:
 
-1.  B1 = A1 ≥ 50 MME
-2.  B2 = A2 \> 7 days
-3.  B3 = A1 ≥ 50 MME ∩ A2 \> 7 days
+1.  ~~B1 = A1 ≥ 50 MME~~
+2.  ~~B2 = A2 \> 7 days~~
+3.  ~~B3 = A1 ≥ 50 MME ∩ A2 \> 7 days~~
 
 ### Outcomes
 

@@ -1,8 +1,8 @@
 # -------------------------------------
-# Script:
-# Author:
-# Purpose:
-# Notes:
+# Script: 04_days_supply.R
+# Author: Nick Williams
+# Purpose: Calculate the nonoverlapping total days supply of opioids (i.e., a value bounded between 1 and 91)
+# Notes: Modified from https://github.com/CI-NYC/medicaid-treatments-oud-risk/blob/main/scripts/01_create_treatments/02_06mo/09_treatment_proportion_days_covered.R
 # -------------------------------------
 
 library(tidyverse)
