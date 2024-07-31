@@ -1,5 +1,5 @@
 # -------------------------------------
-# Script: filter_msk_claims.R
+# Script: 00_filter_msk_claims.R
 # Author: Nick Williams
 # Purpose: Find all msk claims within the specified date range 
 #   in the Other Services and Inpatient files
@@ -13,25 +13,16 @@ library(data.table)
 library(yaml)
 library(fst)
 
-src_root <- "/mnt/processed-data/disability"
+source("R/helpers.R")
+
+# Load necessary datasets
+oth <- open_oth()
+iph <- open_iph()
 
 codes <- read_yaml("data/public/msk_codes.yml")$code
+
 start_dt <- as.Date("2016-07-01")
 end_dt <- as.Date("2019-10-01")
-
-oth <- 
-  list.files(src_root, 
-             pattern = "TAFOTH\\d+_\\d+\\.parquet", 
-             recursive = TRUE) |> 
-  (\(files) file.path(src_root, files))() |> 
-  open_dataset()
-
-iph <- 
-  list.files(src_root, 
-             pattern = "TAFIPH_\\d+\\.parquet", 
-             recursive = TRUE) |> 
-  (\(files) file.path(src_root, files))() |> 
-  open_dataset()
 
 keep <- c("BENE_ID", 
           "CLM_ID", 
@@ -66,7 +57,8 @@ oth_msk <- oth_msk[SRVC_BGN_DT %within% interval(start_dt, end_dt),
                    .(BENE_ID, CLM_ID, SRVC_BGN_DT, DGNS_CD_1, DGNS_CD_2)]
 
 iph_msk <- iph_msk[SRVC_BGN_DT %within% interval(start_dt, end_dt), 
-                   .SD, .SDcols = c("BENE_ID", "CLM_ID", "SRVC_BGN_DT", paste0("DGNS_CD_", 1:10))]
+                   .SD, 
+                   .SDcols = c("BENE_ID", "CLM_ID", "SRVC_BGN_DT", paste0("DGNS_CD_", 1:10))]
 
 setkey(oth_msk, BENE_ID, CLM_ID)
 oth_msk <- unique(oth_msk, by = c(1, 2))
