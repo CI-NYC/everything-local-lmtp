@@ -11,18 +11,10 @@ library(fst)
 library(collapse)
 
 # Load cohort
-cohort <- read_fst(
-  "/mnt/general-data/disability/everything-local-lmtp/msk_washout_continuous_enrollment_opioid_requirements.fst", 
-  as.data.table = TRUE
-)
+cohort <- load_data("msk_washout_continuous_enrollment_opioid_requirements.fst")
 
 # Load study pain opioids
-opioids <- read_fst(
-  file.path(
-    "/mnt/general-data/disability/everything-local-lmtp", 
-    "msk_washout_continuous_enrollment_opioid_requirements_pain_opioids_dts.fst"
-  )
-)
+opioids <- load_data("msk_washout_continuous_enrollment_opioid_requirements_pain_opioids_dts.fst")
 
 washout_oud_misuse <- 
   fsubset(opioids, RX_FILL_DT %within% interval(washout_start_dt, msk_diagnosis_dt)) |> 
@@ -52,11 +44,6 @@ washout_oud_misuse <-
   fselect(BENE_ID, exclusion_oud_misuse) |> 
   join(cohort, how = "right") |> 
   fmutate(exclusion_oud_misuse = replace_na(exclusion_oud_misuse, 0))
-  
-write_fst(
-  washout_oud_misuse, 
-  file.path(
-    "/mnt/general-data/disability/everything-local-lmtp", 
-    "msk_washout_continuous_enrollment_opioid_requirements_washout_oud_misuse.fst"
-  )
-)
+
+# export
+write_data(washout_oud_misuse, "msk_washout_continuous_enrollment_opioid_requirements_washout_oud_misuse.fst")

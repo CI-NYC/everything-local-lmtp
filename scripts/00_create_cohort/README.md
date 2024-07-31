@@ -12,12 +12,33 @@
     prior to the first MSK diagnosis and 3 months after that diagnosis~~
 2.  In the washout period:
     1.  ~~any opioid prescription~~
-    2.  any OUD diagnosis (using the expansive definition)
-3.  Ineligible state (limit to expansion states, excluding MD)
-4.  Dual eligible
-5.  Pregnant
-6.  Outside of age range 19-65
-7.  Cancer, long-term care, palliative care, institutionalized
+    2.  ~~any OUD diagnosis (using the expansive definition)~~
+        - ~~MOUD (buprenorphine, methadone, naltrexone)~~
+
+        - ~~Hillary codes~~
+
+        - ~~Probable misuse~~
+
+        - ~~Poison~~
+3.  ~~Ineligible state (limit to expansion states, excluding MD)~~
+4.  ~~Dual eligible~~
+    - ~~DEBSE~~
+5.  ~~Pregnant~~
+6.  ~~Outside of age range 19-65~~
+7.  ~~More than 1 birthdate~~
+8.  ~~Cancer~~
+    - ~~IHP~~
+
+    - ~~OTH~~
+
+    - ~~DEBSE~~
+9.  Long-term care
+10. ~~Palliative care~~
+    - ~~OTH~~
+
+    - ~~IHP~~
+11. ~~Institutionalized~~
+    - ~~DEBSE~~
 
 ### Inclusion
 
@@ -33,8 +54,6 @@ In the exposure period, define 2 variables: A1, A2
 
 - ~~A2: days supply (max)~~
 
-Truncate these variables to limit outliers.
-
 In addition, define 3 subsets:
 
 1.  ~~B1 = A1 ≥ 50 MME~~
@@ -43,15 +62,15 @@ In addition, define 3 subsets:
 
 ### Outcomes
 
-Discretise follow up time in to 5, 3 month intervals for a total of 15
-months of follow up (starting after the exposure period?). At each point
-make a censoring variable and OUD variable.Individuals are censored
-when:
+Discretise follow up time in to 5, 3 month (91 days) intervals for a
+total of 15 months (455 days) of follow up (starting after the exposure
+period?). At each point make a censoring variable and ~~OUD variable~~.
+Individuals are censored when:
 
-1)  they turn 65
+1)  ~~they turn 65~~
 
-2)  they become dual eligible
+2)  ~~they become dual eligible~~
 
-3)  on December 31, 2019
+3)  ~~on December 31, 2019~~
 
 4)  after 15 months of follow up

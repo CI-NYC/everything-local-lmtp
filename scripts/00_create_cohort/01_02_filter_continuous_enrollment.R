@@ -14,10 +14,15 @@ library(foreach)
 library(doFuture)
 library(dplyr)
 
-drv_root <- "/mnt/general-data/disability/everything-local-lmtp"
+# Load washout dates
+washout <- load_data("msk_washout_dts.fst")
 
-files <- list.files(file.path(drv_root, "tmp"), full.names = TRUE)
+# Load temporary files for 01_01_filter_continuous_enrollment.R
+files <- 
+  "/mnt/general-data/disability/everything-local-lmtp/tmp" |> 
+  list.files(full.names = TRUE)
 
+#' Creates continuous enrollment periods
 find_enrollment_periods <- function(data) {
   # If there is only one row, return that row directly
   if (nrow(data) == 1) {
@@ -78,31 +83,32 @@ find_enrollment_periods <- function(data) {
 plan(multisession, workers = 20)
 
 for (i in seq_along(files)) {
-  tmp <- readRDS(paste0(file.path(drv_root, "tmp"), '/enrollment_period_chunk_', i, '.rds'))
+  tmp <- readRDS(files[i])
   
-  valid_periods <- foreach(x = tmp, 
-                           .combine = "rbind",
-                           .options.future = list(chunk.size = 5e3)) %dofuture% {
-                             find_enrollment_periods(x)
-                           }
+  valid_periods <- 
+    foreach(x = tmp, .combine = "rbind", .options.future = list(chunk.size = 5e3)) %dofuture% {
+      find_enrollment_periods(x)
+    }
   
-  write.fst(valid_periods, 
-            file.path(drv_root, 
-                      "valid_enrollment_periods", 
-                      paste0("enrollment_period_chunk_", i, ".fst")))
+  write_data(
+    valid_periods, 
+    paste0("enrollment_period_chunk_", i, ".fst"), 
+    "/mnt/general-data/disability/everything-local-lmtp/valid_enrollment_periods"
+  )
 }
+
+rm(valid_periods)
+gc()
 
 plan(sequential)
 
-# Load washout dates
-washout <- read_fst(file.path(drv_root, "msk_washout_dts.fst"), 
-                    as.data.table = TRUE)
-
-valid_files <- list.files(file.path(drv_root, "valid_enrollment_periods"), full.names = TRUE)
 cohort <- 
-  lapply(valid_files, \(x) read.fst(x, columns = "BENE_ID", as.data.table = TRUE)) |> 
-         rbindlist()
+  "/mnt/general-data/disability/everything-local-lmtp/valid_enrollment_periods" |> 
+  list.files(full.names = TRUE) |> 
+  lapply(\(x) read_fst(x, columns = "BENE_ID", as.data.table = TRUE)) |> 
+  rbindlist()
 
 washout <- merge(washout, cohort)
 
-write.fst(washout, file.path(drv_root, "msk_washout_continuous_enrollment_dts.fst"))
+# export
+write_data("msk_washout_continuous_enrollment_dts.fst")

@@ -21,10 +21,8 @@ rxl <- open_rxl()
 #  Read in OTL (Other services line) 
 otl <- open_otl()
 
-cohort <- read_fst(
-  "/mnt/general-data/disability/everything-local-lmtp/msk_washout_continuous_enrollment_opioid_requirements.fst", 
-  as.data.table = TRUE
-)
+# load cohort
+cohort <- load_data("msk_washout_continuous_enrollment_opioid_requirements.fst")
 
 mme <- readRDS("data/public/opioids_mme.rds")
 
@@ -119,7 +117,4 @@ opioids <-
   unique() |> 
   mutate(days_supply = replace_na(days_supply, 1))
 
-write_fst(
-  opioids, 
-  "/mnt/general-data/disability/everything-local-lmtp/exposure_period_opioids.fst"
-)
+write_data("everything-local-lmtp/exposure_period_opioids.fst")

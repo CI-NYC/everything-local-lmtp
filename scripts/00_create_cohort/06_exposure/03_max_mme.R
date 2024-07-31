@@ -13,16 +13,9 @@ library(data.table)
 library(foreach)
 library(doFuture)
 
-# Read in cohort and dates
-cohort <- read_fst(
-  "/mnt/general-data/disability/everything-local-lmtp/msk_washout_continuous_enrollment_opioid_requirements.fst", 
-  as.data.table = TRUE
-)
-
-opioids <- read_fst(
-  "/mnt/general-data/disability/everything-local-lmtp/exposure_period_opioids.fst", 
-  as.data.table = TRUE
-)
+# load cohort and opioid data
+cohort <- load_data("msk_washout_continuous_enrollment_opioid_requirements.fst")
+opioids <- load_data("exposure_period_opioids.fst")
 
 setDT(opioids)
 setkey(opioids, BENE_ID)
@@ -66,7 +59,4 @@ testthat::test_that(
   testthat::expect_false(any(is.na(out$exposure_max_daily_dose_mme)))
 )
 
-write_fst(
-  out, 
-  "/mnt/general-data/disability/everything-local-lmtp/exposure_max_daily_dose_mme.fst"
-)
+write_data(out, "exposure_max_daily_dose_mme.fst")

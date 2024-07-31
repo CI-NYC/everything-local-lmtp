@@ -19,8 +19,7 @@ library(fst)
 local <- TRUE
 
 # Load list of NDCs
-ndc <- read.fst("data/public/study_period_unique_ndc.fst", 
-                as.data.table = TRUE)
+ndc <- read_fst("data/public/study_period_unique_ndc.fst")
 
 # Convert NDC -> RxCUI -> ATC
 plan(multisession, workers = 10)

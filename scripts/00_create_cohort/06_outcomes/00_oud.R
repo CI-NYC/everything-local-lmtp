@@ -1,5 +1,5 @@
 # -------------------------------------
-# Script:
+# Script: 00_oud.R
 # Author: Nick Williams
 # Purpose: Create composite OUD survival outcome
 # Notes:
@@ -9,8 +9,6 @@ library(tidyverse)
 library(fst)
 library(collapse)
 library(lubridate)
-
-source("R/helpers.R")
 
 source("R/helpers.R")
 
@@ -71,7 +69,7 @@ oud_hillary <-
   filter(oud_hillary_dt %within% interval(msk_diagnosis_dt, exposure_end_dt + days(455))) |> 
   roworder(BENE_ID, oud_hillary_dt) |> 
   group_by(BENE_ID) |> 
-  filter(n() == 1) |> 
+  filter(row_number() == 1) |> 
   ungroup() |> 
   fselect(BENE_ID, oud_hillary_dt) |> 
   add_all_periods(cohort, y = _, oud_hillary_dt, FALSE, "hillary") |> 
@@ -86,7 +84,7 @@ oud_poison <-
   filter(oud_poison_dt %within% interval(msk_diagnosis_dt, exposure_end_dt + days(455))) |> 
   roworder(BENE_ID, oud_poison_dt) |> 
   group_by(BENE_ID) |> 
-  filter(n() == 1) |> 
+  filter(row_number() == 1) |> 
   ungroup() |> 
   fselect(BENE_ID, oud_poison_dt) |> 
   add_all_periods(cohort, y = _, oud_poison_dt, FALSE, "poison") |> 
@@ -102,7 +100,7 @@ oud_bup <-
   filter(int_overlaps(moud_period, interval(msk_diagnosis_dt, exposure_end_dt + days(455)))) |> 
   arrange(BENE_ID, moud_start_dt, moud_end_dt) |> 
   group_by(BENE_ID) |> 
-  filter(n() == 1) |> 
+  filter(row_number() == 1) |> 
   ungroup() |> 
   fselect(BENE_ID, moud_period) |> 
   add_all_periods(cohort, y = _, moud_period, TRUE, "bup") |> 
@@ -118,7 +116,7 @@ oud_methadone <-
   filter(int_overlaps(moud_period, interval(msk_diagnosis_dt, exposure_end_dt + days(455)))) |> 
   arrange(BENE_ID, moud_start_dt, moud_end_dt) |> 
   group_by(BENE_ID) |> 
-  filter(n() == 1) |> 
+  filter(row_number() == 1) |> 
   ungroup() |> 
   fselect(BENE_ID, moud_period) |> 
   add_all_periods(cohort, y = _, moud_period, TRUE, "methadone") |> 
@@ -134,7 +132,7 @@ oud_nal <-
   filter(int_overlaps(moud_period, interval(msk_diagnosis_dt, exposure_end_dt + days(455)))) |> 
   arrange(BENE_ID, moud_start_dt, moud_end_dt) |> 
   group_by(BENE_ID) |> 
-  filter(n() == 1) |> 
+  filter(row_number() == 1) |> 
   ungroup() |> 
   fselect(BENE_ID, moud_period) |> 
   add_all_periods(cohort, y = _, moud_period, TRUE, "nal") |> 
@@ -206,10 +204,4 @@ oud <-
   select(BENE_ID, starts_with("oud_period")) |> 
   lmtp::event_locf(paste0("oud_period_", 1:5))
 
-write_fst(
-  oud, 
-  file.path(
-    "/mnt/general-data/disability/everything-local-lmtp", 
-    "msk_washout_continuous_enrollment_opioid_requirements_oud_outcomes.fst"
-  )
-)
+write_data(oud, "msk_washout_continuous_enrollment_opioid_requirements_oud_outcomes.fst")

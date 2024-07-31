@@ -14,16 +14,9 @@ library(foreach)
 library(doFuture)
 library(collapse)
 
-# Read in cohort and dates
-cohort <- read_fst(
-  "/mnt/general-data/disability/everything-local-lmtp/msk_washout_continuous_enrollment_opioid_requirements.fst", 
-  as.data.table = TRUE
-)
-
-opioids <- read_fst(
-  "/mnt/general-data/disability/everything-local-lmtp/exposure_period_opioids.fst", 
-  as.data.table = TRUE
-)
+# load cohort and opioid data
+cohort <- load_data("msk_washout_continuous_enrollment_opioid_requirements.fst")
+opioids <- load_data("exposure_period_opioids.fst")
 
 days_supply <- function(data) {
   dur <- 0
@@ -84,7 +77,4 @@ opioids <-
   funique() |> 
   fmutate(exposure_days_supply = days + 1)
 
-write_fst(
-  opioids, 
-  "/mnt/general-data/disability/everything-local-lmtp/exposure_days_supply.fst"
-)
+write_data(opioids, "exposure_days_supply.fst")

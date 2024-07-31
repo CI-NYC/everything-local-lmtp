@@ -1,5 +1,5 @@
 # -------------------------------------
-# Script: 0x_combine.R
+# Script: 07_combine_exclusions_exposure_outcome.R
 # Author: Nick Williams
 # Purpose: Combine exclusion/inclusion criteria, exposure, outcome and censoring files.
 # Notes:
@@ -74,17 +74,9 @@ cohort <-
   convert_cens_to_na(cohort, paste0("oud_period_", 1:5), paste0("cens_period_", 1:5)) |> 
   convert_outcome_to_na(paste0("oud_period_", 1:5), paste0("cens_period_", 1:5)) |> 
   select(BENE_ID, washout_start_dt, msk_diagnosis_dt,
-         starts_with("exposure"), starts_with("subset"), 
-         cens_period_1, oud_period_1, 
-         cens_period_2, oud_period_2, 
-         cens_period_3, oud_period_3, 
-         cens_period_4, oud_period_4, 
-         cens_period_5, oud_period_5)
+         starts_with("exposure"), 
+         starts_with("subset"), 
+         starts_with("cens_period"), 
+         starts_with("oud_period"))
 
-write_fst(
-  cohort, 
-  file.path(
-    "/mnt/general-data/disability/everything-local-lmtp", 
-    "inclusion_exclusion_cohort_with_exposure_outcomes.fst"
-  )
-)
+write_data(cohort, "inclusion_exclusion_cohort_with_exposure_outcomes.fst")

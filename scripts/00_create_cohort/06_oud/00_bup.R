@@ -16,10 +16,7 @@ library(yaml)
 
 source("R/helpers.R")
 
-cohort <- read_fst(
-  "/mnt/general-data/disability/everything-local-lmtp/msk_washout_continuous_enrollment_opioid_requirements.fst", 
-  as.data.table = TRUE
-)
+cohort <- load_data("msk_washout_continuous_enrollment_opioid_requirements.fst")
 
 bup_list <- read_fst("data/public/bup_list.fst")
 hcpcs <- read_yaml("data/public/hcpcs_codes.yml")$buprenorphine
@@ -152,13 +149,7 @@ bup <-
   funique()
 
 # - Save all moud periods for the initial cohort
-write_fst(
-  bup, 
-  file.path(
-    "/mnt/general-data/disability/everything-local-lmtp", 
-    "msk_washout_continuous_enrollment_opioid_requirements_moud_bup_intervals.fst"
-  )
-)
+write_data(bup, "msk_washout_continuous_enrollment_opioid_requirements_moud_bup_intervals.fst")
 
 moud_bup <- 
   roworder(bup, BENE_ID, moud_start_dt) |> 
@@ -175,10 +166,4 @@ moud_bup <-
   join(cohort, moud_bup, how = "left") |> 
   fmutate(moud_bup_washout = replace_na(moud_bup_washout, 0))
 
-write_fst(
-  moud_bup, 
-  file.path(
-    "/mnt/general-data/disability/everything-local-lmtp", 
-    "msk_washout_continuous_enrollment_opioid_requirements_moud_bup_washout.fst"
-  )
-)
+write_data(moud_bup, "msk_washout_continuous_enrollment_opioid_requirements_moud_bup_washout.fst")

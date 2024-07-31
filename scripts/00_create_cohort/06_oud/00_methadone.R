@@ -17,10 +17,7 @@ library(data.table)
 
 source("R/helpers.R")
 
-cohort <- read_fst(
-  "/mnt/general-data/disability/everything-local-lmtp/msk_washout_continuous_enrollment_opioid_requirements.fst", 
-  as.data.table = TRUE
-)
+cohort <- load_data("msk_washout_continuous_enrollment_opioid_requirements.fst")
 
 otl <- open_otl()
 
@@ -54,13 +51,7 @@ otl_methadone <-
   fselect(BENE_ID, moud_start_dt, moud_end_dt)
 
 # - Save all moud periods for the initial cohort
-write_fst(
-  otl_methadone, 
-  file.path(
-    "/mnt/general-data/disability/everything-local-lmtp", 
-    "msk_washout_continuous_enrollment_opioid_requirements_moud_methadone_intervals.fst"
-  )
-)
+write_data(oud_methadone, "msk_washout_continuous_enrollment_opioid_requirements_moud_methadone_intervals.fst")
 
 # - Filter to moud periods where the start or end date is within the washout period
 # - If any moud periods are within the washout period, obs is considered as having moud in washout
@@ -79,10 +70,4 @@ moud_methadone <-
   join(cohort, moud_methadone, how = "left") |> 
   fmutate(moud_methadone_washout = replace_na(moud_methadone_washout, 0))
 
-write_fst(
-  moud_methadone, 
-  file.path(
-    "/mnt/general-data/disability/everything-local-lmtp", 
-    "msk_washout_continuous_enrollment_opioid_requirements_moud_methadone_washout.fst"
-  )
-)
+write_data(moud_methadone, "msk_washout_continuous_enrollment_opioid_requirements_moud_methadone_washout.fst")

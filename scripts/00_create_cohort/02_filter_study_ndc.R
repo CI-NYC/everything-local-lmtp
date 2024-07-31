@@ -12,23 +12,15 @@ library(data.table)
 library(lubridate)
 library(dplyr)
 
-src_root <- "/mnt/processed-data/disability"
+source("R/helpers.R")
 
 # Read in RXL (pharmacy line)
-files <- paste0(list.files(src_root, pattern = "TAFRXL", recursive = TRUE))
-parquet_files <- grep("\\.parquet$", files, value = TRUE)
-rxl <- open_dataset(file.path(src_root, parquet_files))
+rxl <- open_rxl()
 
 # Read in OTL (Other services line) 
-files <- paste0(list.files(src_root, pattern = "TAFOTL", recursive = TRUE))
-parquet_files <- grep("\\.parquet$", files, value = TRUE)
-otl <- open_dataset(file.path(src_root, parquet_files))
+otl <- open_otl()
 
-cohort <- read_fst(
-  "/mnt/general-data/disability/everything-local-lmtp/msk_washout_continuous_enrollment_dts.fst", 
-  as.data.table = TRUE
-)
-
+cohort <- load_data("msk_washout_continuous_enrollment_dts.fst")
 cohort[, let(exposure_end_dt = msk_diagnosis_dt + days(91))]
 
 # OTL ---------------------------------------------------------------------
@@ -69,7 +61,4 @@ study_ndc <-
   unique() |> 
   na.omit()
 
-write.fst(
-  study_ndc, 
-  "data/public/study_period_unique_ndc.fst"
-)
+write_data(study_ndc, "study_period_unique_ndc.fst", "data/public")

@@ -1,0 +1,29 @@
+Opioid pain:
+    ATC:
+        N02A: Opioid analgesics
+        N01AH: Opioid anesthetics
+        N07BC: Drugs used in opioid dependence # Certain exclusions apply
+
+Non-opioid pain:
+    ATC:
+        A03D: Antispasmodics in combination with analgesics
+        A03EA: Antispasmodics, psycholeptics and analgesics in combination
+        M01: Anti-inflammatory and antirheumatic products
+        M02A: Topical products for joint and muscular pain
+        M03: Muscle relaxants
+        N02B: Other analgesics and antipyretics
+        N06A: Anti-depressants
+        
+Benzodiazepines:
+    ATC:
+        N03AE: Benzodiazepine derivatives, antiepileptics
+        N05BA: Benzodiazepine derivatives, anxiolytics
+        N05CD: Benzodiazepine derivatives, hypontics and sedatives
+
+Stimulants:
+    ATC: 
+        N06BA: Centrally acting sympathomimetics
+        
+Gabapentin:
+    ATC:
+        N02BF: Gabapentinoids

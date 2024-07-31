@@ -16,10 +16,7 @@ library(collapse)
 source("R/helpers.R")
 
 # Load cohort
-cohort <- read_fst(
-  "/mnt/general-data/disability/everything-local-lmtp/msk_washout_continuous_enrollment_opioid_requirements.fst", 
-  as.data.table = TRUE
-)
+cohort <- load_data("msk_washout_continuous_enrollment_opioid_requirements.fst")
 
 # Load opioid pain NDC
 opioids <- read_csv("data/public/opioid_pain_ndc.csv")
@@ -65,10 +62,4 @@ opioids <-
   ) |> 
   join(cohort, how = "inner")
 
-write_fst(
-  opioids, 
-  file.path(
-    "/mnt/general-data/disability/everything-local-lmtp", 
-    "msk_washout_continuous_enrollment_opioid_requirements_pain_opioids_dts.fst"
-  )
-)
+write_data(opioids, "msk_washout_continuous_enrollment_opioid_requirements_pain_opioids_dts.fst")

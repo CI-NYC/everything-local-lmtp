@@ -13,22 +13,15 @@ library(foreach)
 library(doFuture)
 library(dplyr)
 
-src_root <- "/mnt/processed-data/disability"
-drv_root <- "/mnt/general-data/disability/everything-local-lmtp"
+source("R/helpers.R")
 
 # Load washout dates
-washout <- read_fst(file.path(drv_root, "msk_washout_dts.fst"), 
-                    as.data.table = TRUE)
+washout <- load_date("msk_washout_dts.fst")
 
 washout[, let(exposure_end_dt = msk_diagnosis_dt + days(91))]
 
 # Load all dates
-dates <- 
-  list.files(src_root, 
-           pattern = "TAFDEDTS_\\d+\\.parquet", 
-           recursive = TRUE) |> 
-  (\(files) file.path(src_root, files))() |> 
-  open_dataset()
+dates <- open_dedts()
 
 dates <- 
   filter(dates, !is.na(BENE_ID)) |> 
@@ -37,10 +30,9 @@ dates <-
   collect()
 
 setDT(dates, key = "BENE_ID")
+
 dates <- dates[order(rleid(BENE_ID), ENRLMT_START_DT)]
-
 dates <- dates[!is.na(ENRLMT_START_DT) & !is.na(ENRLMT_END_DT)]
-
 dates <- dates[ENRLMT_START_DT <= exposure_end_dt]
 
 idx <- split(seq_len(nrow(dates)), list(dates$BENE_ID))
@@ -58,6 +50,9 @@ chunks <- split_list_into_chunks(tmp, 1e5)
 
 # Save each chunk to a separate RDS file
 for (i in seq_along(chunks)) {
-  file_name <- paste0(file.path(drv_root, "tmp"), '/enrollment_period_chunk_', i, '.rds')
+  file_name <- paste0(
+    "/mnt/general-data/disability/everything-local-lmtp/tmp/enrollment_period_chunk_", 
+    i, ".rds"
+  )
   saveRDS(tmp[chunks[[i]]], file = file_name)
 }
