@@ -7,6 +7,7 @@
 # -------------------------------------
 
 library(arrow)
+library(fst)
 
 write_data <- function(data, file, dir = "/mnt/general-data/disability/everything-local-lmtp") {
   write_fst(data, file.path(dir, file))
