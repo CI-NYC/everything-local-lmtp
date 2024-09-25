@@ -17,6 +17,10 @@ demo <- open_demo()
 # load cohort
 cohort <- load_data("inclusion_exclusion_cohort_with_exposure_outcomes.fst")
 
+probable_income <- load_data("probable_high_income_cal.fst")
+
+probable_income <- readRDS("~/probable_high_income_cal.rds")
+
 demo <- 
   filter(demo, BENE_ID %in% cohort$BENE_ID) |> 
   collect() |> 
@@ -42,7 +46,8 @@ demo <-
 
 fill_vals <- function(data, x) {
     select(data, BENE_ID, RFRNC_YR, one_of(x))  |>
-    roworder(BENE_ID, RFRNC_YR) |> 
+    roworder(BENE_ID, RFRNC_YR) |>
+    filter(if (x == "BIRTH_DT" | x == "SEX_CD") !is.na(.data[[x]]) else TRUE) |> # these values shouldn't change
     group_by(BENE_ID) |>
     filter(row_number() == 1) |>
     fselect(-RFRNC_YR) |>
@@ -54,6 +59,7 @@ covar <- reduce(covar, left_join)
 
 cohort <- 
   left_join(cohort, covar) |> 
+  left_join(probable_income) |> 
   mutate(
     dem_age = floor(time_length(interval(BIRTH_DT, washout_start_dt), "years")),
     dem_race = case_when(
@@ -88,7 +94,10 @@ cohort <-
       SSI_STATE_SPLMT_CD == "000" ~ "Not Applicable",
       SSI_STATE_SPLMT_CD %in% c("001","002") ~ "Mandatory or optional"
     ),
-    dem_sex = SEX_CD
+    dem_sex = SEX_CD,
+    dem_probable_high_income = case_when(probable_high_income_cal == 1 ~ 1,
+                                         as.numeric(INCM_CD) >= 3 ~ 1, # https://resdac.org/cms-data/variables/income-relative-federal-poverty-level-latest-year
+                                         TRUE ~ 0)
   ) |> 
   select(BENE_ID, 
          ends_with("dt", ignore.case = FALSE), 
@@ -102,3 +111,4 @@ cohort <-
          cens_period_5, oud_period_5)
 
 write_data(cohort, "msk_cohort.fst")
+

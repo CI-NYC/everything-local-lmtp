@@ -14,6 +14,7 @@ library(tidyr)
 library(data.table)
 library(yaml)
 library(purrr)
+library(stringr)
 
 source("R/helpers.R")
 
@@ -97,13 +98,21 @@ exclusion_codes <-
           exclusion_pregnancy = code %in% codes$pregnant, 
           exclusion_institution = code %in% codes$institution, 
           exclusion_cancer = code %in% codes$cancer, 
-          exclusion_dual_eligible_1 = code %in% codes$dual_eligibility) |> 
-  mutate(across(starts_with("exclusion"), as.numeric))
+          exclusion_dual_eligible_1 = code %in% codes$dual_eligibility,
+          probable_high_income_cal = code %in% codes$income) |> 
+  mutate(across(c(starts_with("exclusion"), probable_high_income_cal), as.numeric))
 
 exclusion_codes <- 
   fselect(cohort, BENE_ID) |> 
   join(exclusion_codes, how = "left") |> 
-  mutate(across(starts_with("exclusion"), ~ replace_na(.x))) |> 
+  mutate(across(c(starts_with("exclusion"), probable_high_income_cal) , ~ replace_na(.x))) 
+
+income_codes <- exclusion_codes |>
+  fselect(BENE_ID, probable_high_income_cal)
+
+write_data(income_codes, "probable_high_income_cal.fst")
+
+exclusion_codes <- exclusion_codes |> 
   fselect(BENE_ID, exclusion_pregnancy, exclusion_institution, exclusion_cancer, exclusion_dual_eligible_1)
 
 # dual eligibility --------------------------------------------------------
