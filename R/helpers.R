@@ -76,3 +76,12 @@ open_demo <- function(path = "/mnt/processed-data/disability/") {
     (\(files) file.path(path, files))() |> 
     open_dataset()
 }
+
+open_demc <- function(path = "/mnt/processed-data/disability") {
+  list.files(path, 
+             pattern = "TAFDEMC_\\d+\\.parquet", 
+             recursive = TRUE) |> 
+    (\(files) file.path(path, files))() |> 
+    open_dataset()
+}
+
