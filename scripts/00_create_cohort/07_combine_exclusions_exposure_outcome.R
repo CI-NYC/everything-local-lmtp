@@ -49,7 +49,7 @@ cohort <-
 convert_cens_to_na <- function (data, outcomes, cens) {
   DT <- as.data.table(data)
   tau <- length(outcomes)
-  for (j in 1:(tau - 1)) {
+  for (j in 1:(tau)) {
     modify <- setdiff(cens[match(cens[j], cens):tau], cens[j])
     outcome_j <- outcomes[j]
     DT[get(outcome_j) == 1, `:=`((modify), lapply(.SD, function(x) NA_real_)), .SDcols = modify]
@@ -65,14 +65,21 @@ convert_outcome_to_na <- function (data, outcomes, cens) {
     modify <- outcomes[match(outcomes[j], outcomes):tau]
     cens_j <- cens[j]
     DT[get(cens_j) == 0, `:=`((modify), lapply(.SD, function(x) NA_real_)), .SDcols = modify]
+    
+    if(j > 1){ # if previously experienced outcome but then censored at later point, considered to have had outcome at subsequent timepoints
+    outcome_j_1 <- outcomes[j-1]
+    DT[get(outcome_j_1) == 1, `:=`((modify), lapply(.SD, function(x) 1)), .SDcols = modify]
+    }
+    
+    
   }
   DT[]
   DT
 }
 
 cohort <- 
-  convert_cens_to_na(cohort, paste0("oud_period_", 1:5), paste0("cens_period_", 1:5)) |> 
-  convert_outcome_to_na(paste0("oud_period_", 1:5), paste0("cens_period_", 1:5)) |> 
+  convert_outcome_to_na(cohort, paste0("oud_period_", 1:5), paste0("cens_period_", 1:5)) |> 
+  convert_cens_to_na(paste0("oud_period_", 1:5), paste0("cens_period_", 1:5)) |> 
   select(BENE_ID, washout_start_dt, msk_diagnosis_dt,
          starts_with("exposure"), 
          starts_with("subset"), 

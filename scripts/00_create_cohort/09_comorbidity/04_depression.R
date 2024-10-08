@@ -239,4 +239,4 @@ all_depression_clean <-
          depression_rolling_mos1_6_cal, depression_rolling_mos2_7_cal, depression_rolling_mos3_8_cal, depression_rolling_mos4_9_cal,
          depression_rolling_mos5_10_cal, depression_rolling_mos6_11_cal)
 
-write_rds(all_depression_clean, "~/comorbidity/depression.rds") # save final data file
+write_rds(all_depression_clean, "/mnt/general-data/disability/everything-local-lmtp/comorbidity/depression.rds") # save final data file

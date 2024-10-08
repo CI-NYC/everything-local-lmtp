@@ -242,4 +242,4 @@ all_mental_ill_clean <-
          mental_ill_rolling_mos1_6_cal, mental_ill_rolling_mos2_7_cal, mental_ill_rolling_mos3_8_cal, mental_ill_rolling_mos4_9_cal,
          mental_ill_rolling_mos5_10_cal, mental_ill_rolling_mos6_11_cal)
 
-write_rds(all_mental_ill_clean, "~/comorbidity/mental_ill.rds") # save final data file
+write_rds(all_mental_ill_clean, "/mnt/general-data/disability/everything-local-lmtp/comorbidity/mental_ill.rds") # save final data file

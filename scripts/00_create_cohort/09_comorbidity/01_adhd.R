@@ -255,4 +255,4 @@ all_adhd_clean <-
          adhd_rolling_mos1_6_cal, adhd_rolling_mos2_7_cal, adhd_rolling_mos3_8_cal, adhd_rolling_mos4_9_cal,
          adhd_rolling_mos5_10_cal, adhd_rolling_mos6_11_cal)
 
-write_rds(all_adhd_clean, "~/comorbidity/adhd.rds") # save final data file
+write_rds(all_adhd_clean, "/mnt/general-data/disability/everything-local-lmtp/comorbidity/adhd.rds") # save final data file

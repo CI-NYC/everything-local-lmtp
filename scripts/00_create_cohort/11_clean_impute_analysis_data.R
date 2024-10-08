@@ -12,9 +12,7 @@ library(readr)
 
 drv_root <- "/mnt/general-data/disability/everything-local-lmtp/"
 
-df <- fst::read_fst(paste0(drv_root ,"msk_cohort_with_MH.fst"))
-
-df <- cohort |>
+df <- fst::read_fst(paste0(drv_root ,"msk_cohort_with_MH.fst")) |>
   as.data.table()
 
 

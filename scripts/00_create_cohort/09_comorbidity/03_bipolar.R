@@ -245,5 +245,5 @@ all_bipolar_clean <-
          bipolar_rolling_mos1_6_cal, bipolar_rolling_mos2_7_cal, bipolar_rolling_mos3_8_cal, bipolar_rolling_mos4_9_cal,
          bipolar_rolling_mos5_10_cal, bipolar_rolling_mos6_11_cal)
 
-write_rds(all_bipolar_clean, "~/comorbidity/bipolar.rds") # save final data file
+write_rds(all_bipolar_clean, "/mnt/general-data/disability/everything-local-lmtp/comorbidity/bipolar.rds") # save final data file
 

@@ -246,4 +246,4 @@ all_anxiety_clean <-
          anxiety_rolling_mos1_6_cal, anxiety_rolling_mos2_7_cal, anxiety_rolling_mos3_8_cal, anxiety_rolling_mos4_9_cal,
          anxiety_rolling_mos5_10_cal, anxiety_rolling_mos6_11_cal)
 
-write_rds(all_anxiety_clean, "~/comorbidity/anxiety.rds") # save final data file
+write_rds(all_anxiety_clean, "/mnt/general-data/disability/everything-local-lmtp/comorbidity/anxiety.rds") # save final data file

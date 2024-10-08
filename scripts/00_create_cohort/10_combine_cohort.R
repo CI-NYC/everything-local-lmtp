@@ -5,13 +5,15 @@
 # Notes:
 # -------------------------------------
 library(tidyverse)
+source("R/helpers.R")
+
 cohort <- load_data("msk_cohort.fst")
 
-adhd <- readRDS("~/comorbidity/adhd.rds")
-anxiety <- readRDS("~/comorbidity/anxiety.rds")
-bipolar <- readRDS("~/comorbidity/bipolar.rds")
-depression <- readRDS("~/comorbidity/depression.rds")
-mental_ill <- readRDS("~/comorbidity/mental_ill.rds")
+adhd <- readRDS("/mnt/general-data/disability/everything-local-lmtp/comorbidity/adhd.rds")
+anxiety <- readRDS("/mnt/general-data/disability/everything-local-lmtp/comorbidity/anxiety.rds")
+bipolar <- readRDS("/mnt/general-data/disability/everything-local-lmtp/comorbidity/bipolar.rds")
+depression <- readRDS("/mnt/general-data/disability/everything-local-lmtp/comorbidity/depression.rds")
+mental_ill <- readRDS("/mnt/general-data/disability/everything-local-lmtp/comorbidity/mental_ill.rds")
 
 cohort_MH_joined <- cohort |>
   left_join(adhd |> select(BENE_ID, adhd_washout_6mos_cal) |> rename("adhd_washout_cal" = "adhd_washout_6mos_cal")) |>
@@ -31,4 +33,4 @@ cohort_MH_joined <- cohort |>
          cens_period_4, oud_period_4, 
          cens_period_5, oud_period_5)
 
-write_data(cohort, "msk_cohort_with_MH.fst")
+write_data(cohort_MH_joined, "msk_cohort_with_MH.fst")

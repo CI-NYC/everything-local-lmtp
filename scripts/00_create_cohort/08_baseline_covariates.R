@@ -19,8 +19,6 @@ cohort <- load_data("inclusion_exclusion_cohort_with_exposure_outcomes.fst")
 
 probable_income <- load_data("probable_high_income_cal.fst")
 
-probable_income <- readRDS("~/probable_high_income_cal.rds")
-
 demo <- 
   filter(demo, BENE_ID %in% cohort$BENE_ID) |> 
   collect() |> 
