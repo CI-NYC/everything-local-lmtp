@@ -8,6 +8,7 @@
 library(tidyverse)
 library(fst)
 library(collapse)
+library(data.table)
 
 source("R/helpers.R")
 
@@ -35,7 +36,8 @@ cohort <- list(
   oth_exclusions, 
   oud_exclusions
 ) |> 
-  reduce(join, how = "left")
+  reduce(join, how = "left") |>
+  mutate(across(everything(), ~ replace_na(., 0)))
 
 # Remove observations with exclusions
 cohort <- filter(cohort, if_all(starts_with("exclusion"), \(x) x == 0))
