@@ -16,7 +16,7 @@ library(dplyr)
 source("R/helpers.R")
 
 # Load washout dates
-washout <- load_date("msk_washout_dts.fst")
+washout <- load_data("msk_washout_dts.fst")
 
 washout[, let(exposure_end_dt = msk_diagnosis_dt + days(91))]
 

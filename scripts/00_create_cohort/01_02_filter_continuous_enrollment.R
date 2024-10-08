@@ -111,4 +111,4 @@ cohort <-
 washout <- merge(washout, cohort)
 
 # export
-write_data("msk_washout_continuous_enrollment_dts.fst")
+write_data(washout, "msk_washout_continuous_enrollment_dts.fst")

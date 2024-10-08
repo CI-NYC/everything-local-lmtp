@@ -72,7 +72,17 @@ rxl <- collect(rxl) |> as.data.table()
 
 # remove observations with opioid in washout period
 remove <- rbind(otl, rxl) |> unique()
+
+# number of patients with opioids in washout
+remove |> nrow()
+
 cohort <- anti_join(cohort, remove)
+
+# Read in RXL (pharmacy line)
+rxl <- open_rxl()
+
+# Read in OTL (Other services line) 
+otl <- open_otl()
 
 # Find beneficiaries with an opioid in the exposure period in OTL
 otl <- 

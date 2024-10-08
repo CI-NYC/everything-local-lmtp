@@ -90,4 +90,7 @@ msk <- msk[washout_start_dt == washout_start_dt_comb, .(BENE_ID, washout_start_d
 
 setnames(msk, "SRVC_BGN_DT", "msk_diagnosis_dt")
 
-write_data(msk, "msk_washout_dts.fst")
+write_data(distinct(msk), "msk_washout_dts.fst")
+
+# number of people with MSK pain claims
+msk |> nrow()
