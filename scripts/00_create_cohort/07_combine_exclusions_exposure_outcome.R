@@ -28,6 +28,8 @@ exposures <- load_data("exposures_with_subsets.fst")
 cens <- load_data("msk_washout_continuous_enrollment_opioid_requirements_censoring.fst")
 # outcomes
 outcomes <- load_data("msk_washout_continuous_enrollment_opioid_requirements_oud_outcomes.fst")
+hillary <- load_data("msk_washout_continuous_enrollment_opioid_requirements_oud_hillary_outcomes.fst")
+
 
 cohort <- list(
   cohort, 
@@ -46,7 +48,14 @@ cohort <- filter(cohort, if_all(starts_with("exclusion"), \(x) x == 0))
 cohort <- 
   join(cohort, exposures, how = "left") |> 
   join(outcomes, how = "left") |> 
-  join(cens, how = "left")
+  join(hillary, how = "left") |> 
+  join(cens, how = "left") |>
+  mutate(cens_hillary_period_1 = cens_period_1,
+         cens_hillary_period_2 = cens_period_2,
+         cens_hillary_period_3 = cens_period_3,
+         cens_hillary_period_4 = cens_period_4,
+         cens_hillary_period_5 = cens_period_5
+         )
 
 convert_cens_to_na <- function (data, outcomes, cens) {
   DT <- as.data.table(data)
@@ -82,10 +91,14 @@ convert_outcome_to_na <- function (data, outcomes, cens) {
 cohort <- 
   convert_outcome_to_na(cohort, paste0("oud_period_", 1:5), paste0("cens_period_", 1:5)) |> 
   convert_cens_to_na(paste0("oud_period_", 1:5), paste0("cens_period_", 1:5)) |> 
+  convert_outcome_to_na(paste0("oud_hillary_period_", 1:5), paste0("cens_hillary_period_", 1:5)) |> 
+  convert_cens_to_na(paste0("oud_hillary_period_", 1:5), paste0("cens_hillary_period_", 1:5)) |> 
   select(BENE_ID, washout_start_dt, msk_diagnosis_dt,
          starts_with("exposure"), 
          starts_with("subset"), 
          starts_with("cens_period"), 
-         starts_with("oud_period"))
+         starts_with("cens_hillary_period"), 
+         starts_with("oud_period"),
+         starts_with("oud_hillary_period"))
 
 write_data(cohort, "inclusion_exclusion_cohort_with_exposure_outcomes.fst")

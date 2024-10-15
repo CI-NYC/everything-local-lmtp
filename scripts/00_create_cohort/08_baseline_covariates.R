@@ -106,7 +106,12 @@ cohort <-
          cens_period_2, oud_period_2, 
          cens_period_3, oud_period_3, 
          cens_period_4, oud_period_4, 
-         cens_period_5, oud_period_5)
+         cens_period_5, oud_period_5,
+         cens_hillary_period_1, oud_hillary_period_1,
+         cens_hillary_period_2, oud_hillary_period_2,
+         cens_hillary_period_3, oud_hillary_period_3,
+         cens_hillary_period_4, oud_hillary_period_4,
+         cens_hillary_period_5, oud_hillary_period_5)
 
 write_data(cohort, "msk_cohort.fst")
 

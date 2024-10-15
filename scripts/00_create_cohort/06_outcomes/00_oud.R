@@ -9,6 +9,7 @@ library(tidyverse)
 library(fst)
 library(collapse)
 library(lubridate)
+library(data.table)
 
 source("R/helpers.R")
 
@@ -204,4 +205,21 @@ oud <-
   select(BENE_ID, starts_with("oud_period")) |> 
   lmtp::event_locf(paste0("oud_period_", 1:5))
 
+oud_hillary <- 
+  list(
+    oud_hillary
+  ) |> 
+  reduce(left_join) |> 
+  mutate(oud_hillary_period_exposure = if_any(.cols = ends_with("period_exposure"), \(x) x == 1),
+         oud_hillary_period_1 = if_any(.cols = ends_with("period_1"), \(x) x == 1), 
+         oud_hillary_period_2 = if_any(.cols = ends_with("period_2"), \(x) x == 1), 
+         oud_hillary_period_3 = if_any(.cols = ends_with("period_3"), \(x) x == 1), 
+         oud_hillary_period_4 = if_any(.cols = ends_with("period_4"), \(x) x == 1), 
+         oud_hillary_period_5 = if_any(.cols = ends_with("period_5"), \(x) x == 1), 
+         across(starts_with("oud_hillary_period"), as.numeric)) |> 
+  select(BENE_ID, starts_with("oud_hillary_period")) |> 
+  lmtp::event_locf(paste0("oud_hillary_period_", 1:5))
+
 write_data(oud, "msk_washout_continuous_enrollment_opioid_requirements_oud_outcomes.fst")
+write_data(oud_hillary, "msk_washout_continuous_enrollment_opioid_requirements_oud_hillary_outcomes.fst")
+
