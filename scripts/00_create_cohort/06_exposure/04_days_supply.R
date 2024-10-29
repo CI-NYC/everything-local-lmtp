@@ -18,6 +18,8 @@ library(collapse)
 cohort <- load_data("msk_washout_continuous_enrollment_opioid_requirements.fst")
 opioids <- load_data("exposure_period_opioids.fst")
 
+source("R/helpers.R")
+
 days_supply <- function(data) {
   dur <- 0
   rx_int <- with(data, interval(rx_start, rx_end))

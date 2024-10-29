@@ -13,6 +13,8 @@ library(data.table)
 library(foreach)
 library(doFuture)
 
+source("R/helpers.R")
+
 # load cohort and opioid data
 cohort <- load_data("msk_washout_continuous_enrollment_opioid_requirements.fst")
 opioids <- load_data("exposure_period_opioids.fst")
@@ -22,6 +24,12 @@ setkey(opioids, BENE_ID)
 
 opioids <- opioids[, .(BENE_ID, msk_diagnosis_dt, exposure_end_dt, 
                        rx_start_dt, rx_end_dt, NDC, opioid, mme_strength_per_day)]
+
+num_opioids <- opioids |>
+  group_by(BENE_ID) |>
+  summarize(num_opioids = n())
+
+saveRDS(num_opioids, "/mnt/general-data/disability/everything-local-lmtp/num_opioids.rds")
 
 # Calculate max daily dose -----------------------------------------------------
 
