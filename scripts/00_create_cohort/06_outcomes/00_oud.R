@@ -185,14 +185,16 @@ oud_misuse <-
   right_join(select(cohort, BENE_ID)) |> 
   fmutate(across(misuse_period_exposure:misuse_period_5, replace_na))
 
+# only include hillary + poision in main outcome
+
 oud <- 
   list(
     oud_hillary, 
-    oud_poison, 
-    oud_bup, 
-    oud_methadone, 
-    oud_nal, 
-    oud_misuse
+    oud_poison#, 
+    #oud_bup, 
+    #oud_methadone, 
+    #oud_nal, 
+    #oud_misuse
   ) |> 
   reduce(left_join) |> 
   mutate(oud_period_exposure = if_any(.cols = ends_with("period_exposure"), \(x) x == 1),
