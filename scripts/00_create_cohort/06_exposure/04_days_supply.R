@@ -14,11 +14,11 @@ library(foreach)
 library(doFuture)
 library(collapse)
 
+source("R/helpers.R")
+
 # load cohort and opioid data
 cohort <- load_data("msk_washout_continuous_enrollment_opioid_requirements.fst")
 opioids <- load_data("exposure_period_opioids.fst")
-
-source("R/helpers.R")
 
 days_supply <- function(data) {
   dur <- 0
@@ -41,7 +41,7 @@ days_supply <- function(data) {
 opioids <- 
   opioids |> 
   mutate(rx_int = interval(rx_start_dt, rx_end_dt), 
-         rx_int = intersect(rx_int, interval(msk_diagnosis_dt, exposure_end_dt))) |> 
+         rx_int = intersect(rx_int, interval(msk_diagnosis_dt, as.Date(ifelse(rx_end_dt > exposure_end_dt, exposure_end_dt + days(1), exposure_end_dt))))) |> # bug where if exposure end date and rx end overlap, interval is 1 less than should be
   select(BENE_ID, NDC, opioid, rx_int) |> 
   as_tibble() |> 
   mutate(interval_days_supply = as.numeric(as.duration(rx_int), "days")) |> 
@@ -60,7 +60,31 @@ testthat::test_that(
   testthat::expect_equal({
     fsubset(opioids, BENE_ID %==% "HHHHHH447777ddB") |> 
       days_supply()
-  }, 75)
+  }, 76)
+)
+
+testthat::test_that(
+  "Test days_supply function works as expected",
+  testthat::expect_equal({
+    fsubset(opioids, BENE_ID %==% "HHHHHH447AddkCB") |> 
+      days_supply()
+  }, 25)
+)
+
+testthat::test_that(
+  "Test days_supply function works as expected",
+  testthat::expect_equal({
+    fsubset(opioids, BENE_ID %==% "HHHHHH44Ak7AnnH") |> 
+      days_supply()
+  }, 28)
+)
+
+testthat::test_that(
+  "Test days_supply function works as expected",
+  testthat::expect_equal({
+    fsubset(opioids, BENE_ID %==% "HHHHHH4477d4Bnd") |> 
+      days_supply()
+  }, 30)
 )
 
 plan(multisession, workers = 50)
@@ -76,7 +100,7 @@ plan(sequential)
 
 opioids <- 
   fselect(opioids, BENE_ID) |> 
-  funique() |> 
-  fmutate(exposure_days_supply = days + 1)
+  funique() |>
+  fmutate(exposure_days_supply = days)
 
 write_data(opioids, "exposure_days_supply.fst")

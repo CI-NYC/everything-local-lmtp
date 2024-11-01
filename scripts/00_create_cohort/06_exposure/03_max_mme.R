@@ -23,7 +23,8 @@ setDT(opioids)
 setkey(opioids, BENE_ID)
 
 opioids <- opioids[, .(BENE_ID, msk_diagnosis_dt, exposure_end_dt, 
-                       rx_start_dt, rx_end_dt, NDC, opioid, mme_strength_per_day)]
+                       rx_start_dt, rx_end_dt, NDC, opioid, mme_strength_per_day)] |>
+  mutate(rx_end_dt = rx_end_dt - days(1)) # true exposure end date should be 1 less than what was previously used
 
 num_opioids <- opioids |>
   group_by(BENE_ID) |>
