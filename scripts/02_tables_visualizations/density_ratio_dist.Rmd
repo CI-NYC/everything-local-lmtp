@@ -1,0 +1,211 @@
+---
+title: "Untitled"
+output: github_document
+date: "2024-11-21"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(tidyverse)
+```
+
+## Original Neural Network
+
+### Observed (B1)
+```{r}
+read_results <- function(t, shift, conditional, path){
+  data <- readRDS((paste0("~/", path, "/local_lmtp_results_", shift, "_", conditional, "_time_", t, ".rds")))
+}
+
+obs_B1_1_original <- read_results("1", "obs", "subset_B1", path = "results_new")$density_ratios[, 1]
+obs_B1_2_original <- read_results("2", "obs", "subset_B1", path = "results_new")$density_ratios[, 2]
+obs_B1_3_original <- read_results("3", "obs", "subset_B1", path = "results_new")$density_ratios[, 3]  
+obs_B1_4_original <- read_results("4", "obs", "subset_B1", path = "results_new")$density_ratios[, 4]  
+obs_B1_5_original <- read_results("5", "obs", "subset_B1", path = "results_new")$density_ratios[, 5] 
+
+nn_B1_obs <- boxplot(obs_B1_1_original, obs_B1_2_original, obs_B1_3_original, obs_B1_4_original, obs_B1_5_original,
+        names = c("t1", "t2", "t3", "t4", "t5"),
+        main = "Dist. of Density Ratios (Subset B1, Observed) -- Original Neural Network", 
+        xlab = "Time", ylab = "Density Ratio", cex.main = 0.75)
+
+lapply(list(obs_B1_1_original, obs_B1_2_original, obs_B1_3_original, obs_B1_4_original, obs_B1_5_original), function(x) summary(x))
+```
+
+### Observed (B2)
+```{r}
+obs_B2_1_original <- read_results("1", "obs", "subset_B2", path = "results_new")$density_ratios[, 1] 
+obs_B2_2_original <- read_results("2", "obs", "subset_B2", path = "results_new")$density_ratios[, 2] 
+obs_B2_3_original <- read_results("3", "obs", "subset_B2", path = "results_new")$density_ratios[, 3]  
+obs_B2_4_original <- read_results("4", "obs", "subset_B2", path = "results_new")$density_ratios[, 4]  
+obs_B2_5_original <- read_results("5", "obs", "subset_B2", path = "results_new")$density_ratios[, 5] 
+
+nn_B2_obs <- boxplot(obs_B2_1_original, obs_B2_2_original, obs_B2_3_original, obs_B2_4_original, obs_B2_5_original,
+        names = c("t1", "t2", "t3", "t4", "t5"), 
+        main = "Dist. of Density Ratios (Subset B2, Observed) -- Original Neural Network", 
+        xlab = "Time", ylab = "Density Ratio", cex.main = 0.75)
+
+lapply(list(obs_B2_1_original, obs_B2_2_original, obs_B2_3_original, obs_B2_4_original, obs_B2_5_original), function(x) summary(x))
+```
+
+### Observed (B3)
+```{r}
+obs_B3_1_original <- read_results("1", "obs", "subset_B3", path = "results_new")$density_ratios[, 1] 
+obs_B3_2_original <- read_results("2", "obs", "subset_B3", path = "results_new")$density_ratios[, 2] 
+obs_B3_3_original <- read_results("3", "obs", "subset_B3", path = "results_new")$density_ratios[, 3]  
+obs_B3_4_original <- read_results("4", "obs", "subset_B3", path = "results_new")$density_ratios[, 4]  
+obs_B3_5_original <- read_results("5", "obs", "subset_B3", path = "results_new")$density_ratios[, 5] 
+
+nn_B3_obs <- boxplot(obs_B3_1_original, obs_B3_2_original, obs_B3_3_original, obs_B3_4_original, obs_B3_5_original,
+        names = c("t1", "t2", "t3", "t4", "t5"), 
+        main = "Dist. of Density Ratios (Subset B3, Observed) -- Original Neural Network", 
+        xlab = "Time", ylab = "Density Ratio", cex.main = 0.75)
+
+lapply(list(obs_B3_1_original, obs_B3_2_original, obs_B3_3_original, obs_B3_4_original, obs_B3_5_original), function(x) summary(x))
+```
+
+### d1 (B1)
+```{r}
+d1_B1_1_original <- read_results("1", "d1", "subset_B1", path = "results_new")$density_ratios[, 1] 
+d1_B1_2_original <- read_results("2", "d1", "subset_B1", path = "results_new")$density_ratios[, 2] 
+d1_B1_3_original <- read_results("3", "d1", "subset_B1", path = "results_new")$density_ratios[, 3]  
+d1_B1_4_original <- read_results("4", "d1", "subset_B1", path = "results_new")$density_ratios[, 4]  
+d1_B1_5_original <- read_results("5", "d1", "subset_B1", path = "results_new")$density_ratios[, 5] 
+
+nn_B1_d1 <- boxplot(d1_B1_1_original, d1_B1_2_original, d1_B1_3_original, d1_B1_4_original, d1_B1_5_original,
+        names = c("t1", "t2", "t3", "t4", "t5"), 
+        main = "Dist. of Density Ratios (Subset B1, d1) -- Original Neural Network", 
+        xlab = "Time", ylab = "Density Ratio", cex.main = 0.75)
+
+lapply(list(d1_B1_1_original, d1_B1_2_original, d1_B1_3_original, d1_B1_4_original, d1_B1_5_original), function(x) summary(x))
+```
+
+### d2 (B2)
+```{r}
+d2_B2_1_original <- read_results("1", "d2", "subset_B2", path = "results_new")$density_ratios[, 1] 
+d2_B2_2_original <- read_results("2", "d2", "subset_B2", path = "results_new")$density_ratios[, 2] 
+d2_B2_3_original <- read_results("3", "d2", "subset_B2", path = "results_new")$density_ratios[, 3]  
+d2_B2_4_original <- read_results("4", "d2", "subset_B2", path = "results_new")$density_ratios[, 4]  
+d2_B2_5_original <- read_results("5", "d2", "subset_B2", path = "results_new")$density_ratios[, 5] 
+
+nn_B2_d2 <- boxplot(d2_B2_1_original, d2_B2_2_original, d2_B2_3_original, d2_B2_4_original, d2_B2_5_original,
+        names = c("t1", "t2", "t3", "t4", "t5"), 
+        main = "Dist. of Density Ratios (Subset B2, d2) -- Original Neural Network", 
+        xlab = "Time", ylab = "Density Ratio", cex.main = 0.75)
+
+lapply(list(d2_B2_1_original, d2_B2_2_original, d2_B2_3_original, d2_B2_4_original, d2_B2_5_original), function(x) summary(x))
+```
+
+### d3 (B3)
+```{r}
+d3_B3_1_original <- read_results("1", "d3", "subset_B3", path = "results_new")$density_ratios[, 1] 
+d3_B3_2_original <- read_results("2", "d3", "subset_B3", path = "results_new")$density_ratios[, 2] 
+d3_B3_3_original <- read_results("3", "d3", "subset_B3", path = "results_new")$density_ratios[, 3]  
+d3_B3_4_original <- read_results("4", "d3", "subset_B3", path = "results_new")$density_ratios[, 4]  
+d3_B3_5_original <- read_results("5", "d3", "subset_B3", path = "results_new")$density_ratios[, 5] 
+
+nn_B3_d3 <- boxplot(d3_B3_1_original, d3_B3_2_original, d3_B3_3_original, d3_B3_4_original, d3_B3_5_original,
+        names = c("t1", "t2", "t3", "t4", "t5"), 
+        main = "Dist. of Density Ratios (Subset B3, d3) -- Original Neural Network", 
+        xlab = "Time", ylab = "Density Ratio", cex.main = 0.75)
+
+lapply(list(d3_B3_1_original, d3_B3_2_original, d3_B3_3_original, d3_B3_4_original, d3_B3_5_original), function(x) summary(x))
+```
+
+## Boosting
+
+### Observed (B1)
+```{r}
+obs_B1_1_Boost <- read_results("1", "obs", "subset_B1", path = "results_boost")$density_ratios[, 1]
+obs_B1_2_Boost <- read_results("2", "obs", "subset_B1", path = "results_boost")$density_ratios[, 2]
+obs_B1_3_Boost <- read_results("3", "obs", "subset_B1", path = "results_boost")$density_ratios[, 3]  
+obs_B1_4_Boost <- read_results("4", "obs", "subset_B1", path = "results_boost")$density_ratios[, 4]  
+obs_B1_5_Boost <- read_results("5", "obs", "subset_B1", path = "results_boost")$density_ratios[, 5] 
+
+boost_B1_obs <- boxplot(obs_B1_1_Boost, obs_B1_2_Boost, obs_B1_3_Boost, obs_B1_4_Boost, obs_B1_5_Boost,
+                     names = c("t1", "t2", "t3", "t4", "t5"),
+                     main = "Dist. of Density Ratios (Subset B1, Observed) -- Boost", 
+                     xlab = "Time", ylab = "Density Ratio", cex.main = 0.75)
+
+lapply(list(obs_B1_1_Boost, obs_B1_2_Boost, obs_B1_3_Boost, obs_B1_4_Boost, obs_B1_5_Boost), function(x) summary(x))
+```
+
+### Observed (B2)
+```{r}
+obs_B2_1_Boost <- read_results("1", "obs", "subset_B2", path = "results_boost")$density_ratios[, 1] 
+obs_B2_2_Boost <- read_results("2", "obs", "subset_B2", path = "results_boost")$density_ratios[, 2] 
+obs_B2_3_Boost <- read_results("3", "obs", "subset_B2", path = "results_boost")$density_ratios[, 3]  
+obs_B2_4_Boost <- read_results("4", "obs", "subset_B2", path = "results_boost")$density_ratios[, 4]  
+obs_B2_5_Boost <- read_results("5", "obs", "subset_B2", path = "results_boost")$density_ratios[, 5] 
+
+boost_B2_obs <- boxplot(obs_B2_1_Boost, obs_B2_2_Boost, obs_B2_3_Boost, obs_B2_4_Boost, obs_B2_5_Boost,
+                     names = c("t1", "t2", "t3", "t4", "t5"), 
+                     main = "Dist. of Density Ratios (Subset B2, Observed) -- Boost", 
+                     xlab = "Time", ylab = "Density Ratio", cex.main = 0.75)
+
+lapply(list(obs_B2_1_Boost, obs_B2_2_Boost, obs_B2_3_Boost, obs_B2_4_Boost, obs_B2_5_Boost), function(x) summary(x))
+```
+
+### Observed (B3)
+```{r}
+obs_B3_1_Boost <- read_results("1", "obs", "subset_B3", path = "results_boost")$density_ratios[, 1] 
+obs_B3_2_Boost <- read_results("2", "obs", "subset_B3", path = "results_boost")$density_ratios[, 2] 
+obs_B3_3_Boost <- read_results("3", "obs", "subset_B3", path = "results_boost")$density_ratios[, 3]  
+obs_B3_4_Boost <- read_results("4", "obs", "subset_B3", path = "results_boost")$density_ratios[, 4]  
+obs_B3_5_Boost <- read_results("5", "obs", "subset_B3", path = "results_boost")$density_ratios[, 5] 
+
+boost_B3_obs <- boxplot(obs_B3_1_Boost, obs_B3_2_Boost, obs_B3_3_Boost, obs_B3_4_Boost, obs_B3_5_Boost,
+                     names = c("t1", "t2", "t3", "t4", "t5"), 
+                     main = "Dist. of Density Ratios (Subset B3, Observed) -- Boost", 
+                     xlab = "Time", ylab = "Density Ratio", cex.main = 0.75)
+
+lapply(list(obs_B3_1_Boost, obs_B3_2_Boost, obs_B3_3_Boost, obs_B3_4_Boost, obs_B3_5_Boost), function(x) summary(x))
+```
+
+### d1 (B1)
+```{r}
+d1_B1_1_Boost <- read_results("1", "d1", "subset_B1", path = "results_boost")$density_ratios[, 1] 
+d1_B1_2_Boost <- read_results("2", "d1", "subset_B1", path = "results_boost")$density_ratios[, 2] 
+d1_B1_3_Boost <- read_results("3", "d1", "subset_B1", path = "results_boost")$density_ratios[, 3]  
+d1_B1_4_Boost <- read_results("4", "d1", "subset_B1", path = "results_boost")$density_ratios[, 4]  
+d1_B1_5_Boost <- read_results("5", "d1", "subset_B1", path = "results_boost")$density_ratios[, 5] 
+
+boost_B1_d1 <- boxplot(d1_B1_1_Boost, d1_B1_2_Boost, d1_B1_3_Boost, d1_B1_4_Boost, d1_B1_5_Boost,
+                    names = c("t1", "t2", "t3", "t4", "t5"), 
+                    main = "Dist. of Density Ratios (Subset B1, d1) -- Boost", 
+                    xlab = "Time", ylab = "Density Ratio", cex.main = 0.75)
+
+lapply(list(d1_B1_1_Boost, d1_B1_2_Boost, d1_B1_3_Boost, d1_B1_4_Boost, d1_B1_5_Boost), function(x) summary(x))
+```
+
+### d2 (B2)
+```{r}
+d2_B2_1_Boost <- read_results("1", "d2", "subset_B2", path = "results_boost")$density_ratios[, 1] 
+d2_B2_2_Boost <- read_results("2", "d2", "subset_B2", path = "results_boost")$density_ratios[, 2] 
+d2_B2_3_Boost <- read_results("3", "d2", "subset_B2", path = "results_boost")$density_ratios[, 3]  
+d2_B2_4_Boost <- read_results("4", "d2", "subset_B2", path = "results_boost")$density_ratios[, 4]  
+d2_B2_5_Boost <- read_results("5", "d2", "subset_B2", path = "results_boost")$density_ratios[, 5] 
+
+boost_B2_d2 <- boxplot(d2_B2_1_Boost, d2_B2_2_Boost, d2_B2_3_Boost, d2_B2_4_Boost, d2_B2_5_Boost,
+                    names = c("t1", "t2", "t3", "t4", "t5"), 
+                    main = "Dist. of Density Ratios (Subset B2, d2) -- Boost", 
+                    xlab = "Time", ylab = "Density Ratio", cex.main = 0.75)
+
+lapply(list(d2_B2_1_Boost, d2_B2_2_Boost, d2_B2_3_Boost, d2_B2_4_Boost, d2_B2_5_Boost), function(x) summary(x))
+```
+
+### d3 (B3)
+```{r}
+d3_B3_1_Boost <- read_results("1", "d3", "subset_B3", path = "results_boost")$density_ratios[, 1] 
+d3_B3_2_Boost <- read_results("2", "d3", "subset_B3", path = "results_boost")$density_ratios[, 2] 
+d3_B3_3_Boost <- read_results("3", "d3", "subset_B3", path = "results_boost")$density_ratios[, 3]  
+d3_B3_4_Boost <- read_results("4", "d3", "subset_B3", path = "results_boost")$density_ratios[, 4]  
+d3_B3_5_Boost <- read_results("5", "d3", "subset_B3", path = "results_boost")$density_ratios[, 5] 
+
+boost_B3_d3 <- boxplot(d3_B3_1_Boost, d3_B3_2_Boost, d3_B3_3_Boost, d3_B3_4_Boost, d3_B3_5_Boost,
+                    names = c("t1", "t2", "t3", "t4", "t5"), 
+                    main = "Dist. of Density Ratios (Subset B3, d3) -- Boost", 
+                    xlab = "Time", ylab = "Density Ratio", cex.main = 0.75)
+
+lapply(list(d3_B3_1_Boost, d3_B3_2_Boost, d3_B3_3_Boost, d3_B3_4_Boost, d3_B3_5_Boost), function(x) summary(x))
+```
+
