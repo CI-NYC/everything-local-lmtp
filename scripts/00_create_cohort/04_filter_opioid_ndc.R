@@ -19,7 +19,9 @@ codes <- read_yaml("data/public/drug_codes.yml")
 
 # load initial continuous enrollment cohort
 cohort <- load_data("msk_washout_continuous_enrollment_dts.fst")
-cohort[, let(exposure_end_dt = msk_diagnosis_dt + days(91))]
+#cohort[, let(exposure_end_dt = msk_diagnosis_dt + days(91))]
+cohort <- cohort |>
+  mutate(exposure_end_dt = msk_diagnosis_dt + days(91))
 
 # find opioid ndcs --------------------------------------------------------
 

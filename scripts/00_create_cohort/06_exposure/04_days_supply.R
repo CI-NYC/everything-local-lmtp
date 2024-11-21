@@ -14,7 +14,7 @@ library(foreach)
 library(doFuture)
 library(collapse)
 
-source("R/helpers.R")
+source("~/everything-local-lmtp/R/helpers.R")
 
 # load cohort and opioid data
 cohort <- load_data("msk_washout_continuous_enrollment_opioid_requirements.fst")

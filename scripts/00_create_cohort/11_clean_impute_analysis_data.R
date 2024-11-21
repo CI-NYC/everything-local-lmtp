@@ -91,7 +91,7 @@ df[, `:=`(dem_sex_m = fifelse(dem_sex == "M", 1, 0), # Sex (reference category s
 
 # truncating max MME exposure due to low coverage (99th percentile as discussed)
 df[, `:=`(exposure_max_daily_dose_mme = pmin(exposure_max_daily_dose_mme, quantile(exposure_max_daily_dose_mme, 0.99)))]
-
+ # 240 MME
 
 # Save in the mediation folder
 fst::write_fst(df, file.path(drv_root, "msk_cohort_clean_imputed.fst"))
