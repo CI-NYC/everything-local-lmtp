@@ -1,4 +1,4 @@
-Untitled
+Distributions of Density Ratios (Original Neural Network and Boosting)
 ================
 2024-11-21
 
