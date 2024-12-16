@@ -5,7 +5,7 @@
 # Notes:
 # -------------------------------------
 #devtools::install_github("nt-williams/riesznet", auth_token = "TOKEN", force = TRUE)
-library(lmtp)
+library(lmtp, lib.loc = "/mnt/dev/lmtp-local-riesznet")
 library(riesznet)
 library(tidyverse)
 library(mlr3superlearner)
@@ -19,11 +19,16 @@ drv_root <- "/mnt/general-data/disability/everything-local-lmtp/"
 
 df <- fst::read_fst(paste0(drv_root ,"msk_cohort_clean_imputed.fst")) |>
   as.data.table() |>
-  mutate(subset_B4 = ifelse(exposure_max_daily_dose_mme > 90, TRUE, FALSE),
-         subset_B5 = ifelse(exposure_max_daily_dose_mme > 90 & exposure_days_supply > 7, TRUE, FALSE),
+  mutate(subset_B4 = ifelse(exposure_max_daily_dose_mme >= 90, TRUE, FALSE),
+         subset_B5 = ifelse(exposure_max_daily_dose_mme >= 90 & exposure_days_supply > 7, TRUE, FALSE),
          subset_B6 = ifelse(exposure_days_supply > 30, TRUE, FALSE),
-         subset_B7 = ifelse(exposure_days_supply > 30 & exposure_max_daily_dose_mme > 50, TRUE, FALSE),
-         subset_B8 = ifelse(exposure_days_supply > 30 & exposure_max_daily_dose_mme > 90, TRUE, FALSE)
+         subset_B7 = ifelse(exposure_days_supply > 30 & exposure_max_daily_dose_mme >= 50, TRUE, FALSE),
+         subset_B8 = ifelse(exposure_days_supply > 30 & exposure_max_daily_dose_mme >= 90, TRUE, FALSE)
+  ) |>
+  mutate(subset_B_not_risky_MME = ifelse(exposure_max_daily_dose_mme < 50, TRUE, FALSE),
+         subset_B_not_risky_MME_days = ifelse(exposure_max_daily_dose_mme < 50 & exposure_days_supply <= 7, TRUE, FALSE),
+         subset_B_not_risky_days = ifelse(exposure_days_supply <= 7, TRUE, FALSE),
+         subset_cohort = TRUE
   )
 
 W <- c(
@@ -92,10 +97,15 @@ run_lmtp <- function(data, t, shift, conditional)
   data <- data |>
     as.data.frame()
   
-  conditional_matrix <- data |>
-    select(conditional) |>
-    mutate(across(all_of(conditional), ~ as.logical(.))) |>
-    as.matrix()
+  if(conditional == "cohort")
+  {
+    conditional_matrix <- NULL
+  } else{
+    conditional_matrix <- data |>
+      select(conditional) |>
+      mutate(across(all_of(conditional), ~ as.logical(.))) |>
+      as.matrix()
+  }
   
   if(shift == "obs")
   {
@@ -103,7 +113,7 @@ run_lmtp <- function(data, t, shift, conditional)
   } else if (shift == "d1")
   {
     shifted <- data |>
-      mutate(exposure_max_daily_dose_mme = 0.8 * exposure_max_daily_dose_mme, # reduce MME by 20%
+      mutate(exposure_max_daily_dose_mme = ifelse(0.8 * exposure_max_daily_dose_mme > min(exposure_max_daily_dose_mme), 0.8 * exposure_max_daily_dose_mme, exposure_max_daily_dose_mme), # reduce MME by 20%
              cens_period_1 = 1,
              cens_period_2 = 1,
              cens_period_3 = 1,
@@ -112,7 +122,7 @@ run_lmtp <- function(data, t, shift, conditional)
   } else if (shift == "d2")
   {
     shifted <- data |>
-      mutate(exposure_days_supply = 0.8 * exposure_days_supply, # reduce days supplied by 20%
+      mutate(exposure_days_supply = ifelse(0.8 * exposure_days_supply > min(exposure_days_supply), 0.8 * exposure_days_supply, exposure_days_supply), # reduce days supplied by 20%
              cens_period_1 = 1,
              cens_period_2 = 1,
              cens_period_3 = 1,
@@ -121,8 +131,8 @@ run_lmtp <- function(data, t, shift, conditional)
   }else 
   {
     shifted <- data |>
-      mutate(exposure_max_daily_dose_mme = 0.8 * exposure_max_daily_dose_mme, # reduce MME by 20%
-             exposure_days_supply = 0.8 * exposure_days_supply, # reduce days supplied by 20%
+      mutate(exposure_max_daily_dose_mme = ifelse(0.8 * exposure_max_daily_dose_mme > min(exposure_max_daily_dose_mme), 0.8 * exposure_max_daily_dose_mme, exposure_max_daily_dose_mme), # reduce MME by 20%
+             exposure_days_supply = ifelse(0.8 * exposure_days_supply > min(exposure_days_supply), 0.8 * exposure_days_supply, exposure_days_supply), # reduce days supplied by 20%
              cens_period_1 = 1,
              cens_period_2 = 1,
              cens_period_3 = 1,
@@ -131,71 +141,75 @@ run_lmtp <- function(data, t, shift, conditional)
   } 
   
   est <- progressr::with_progress(lmtp_tmle(data = data,
-                   trt = list(c("exposure_max_daily_dose_mme", "exposure_days_supply")),
-                   outcome = paste0("oud_period_", 1:t),
-                   baseline = W, 
-                   cens = paste0("cens_period_", 1:t),
-                   shifted = shifted,
-                   conditional = conditional_matrix, 
-                   riesz = TRUE, # must be true if conditional supplied
-                   mtp = TRUE,
-                   outcome_type = ifelse(t == 1, "binomial", "survival"),
-                   learners_outcome = c("mean", "glm", "earth", "lightgbm"),
-                   learners_trt = c("mean", "glm", "earth", "lightgbm"),
-                   folds = 2,
-                   control = lmtp_control(.learners_outcome_folds = 2,
-                                          .learners_trt_folds = 2,
-                                          .learners_conditional_folds = 2#,
-                                          #.patience = 25,
-                                          #.epochs = 50L,
-                                          #.batch_size = 256,
-                                          #.learning_rate = 0.01
-                                          ))
+                                            trt = list(c("exposure_max_daily_dose_mme", "exposure_days_supply")),
+                                            outcome = paste0("oud_period_", 1:t),
+                                            baseline = W, 
+                                            cens = paste0("cens_period_", 1:t),
+                                            shifted = shifted,
+                                            conditional = conditional_matrix, 
+                                            riesz = TRUE, # must be true if conditional supplied
+                                            mtp = TRUE,
+                                            outcome_type = ifelse(t == 1, "binomial", "survival"),
+                                            learners_outcome = c("mean", "glm", "earth", "lightgbm"),
+                                            learners_trt = c("mean", "glm", "earth", "lightgbm"),
+                                            folds = 2,
+                                            control = lmtp_control(.learners_outcome_folds = 2,
+                                                                   .learners_trt_folds = 2,
+                                                                   .learners_conditional_folds = 2,
+                                                                   .patience = 10,
+                                                                   .epochs = 50L,
+                                                                   .batch_size = 256,
+                                                                   .learning_rate = 0.1,
+                                                                   .weight_decay = 1
+                                            ))
   )
   
   est
 }
 
 set.seed(5)
-for(t in 1:5)
+for(t in 5:5)
 {
-for(shift in c(#"obs"#,
- #"d1"#,
- #"d2"#,
-  "d3"
-))
-{
-  for(subset in c(#"subset_B1"#, 
-    #"subset_B2"#,
-   "subset_B3"#,
-   #"subset_B4"#,
-   #"subset_B5"#,
-   #"subset_B6"#,
-   #"subset_B7"#,
-   #"subset_B8"#
+  for(shift in c("obs"#,
+                #"d1"#,
+                 #"d2"#,
+                 #"d3"
   ))
-  {
-    finished <- FALSE
-    
-    while(!finished){ # if failed on previous iteration, try again
+  { # NEED TO RUN 8 under observation (not_risky_MME_days under day 1); 
+    for(subset in c(#"subset_B1"#, 
+      #"subset_B2"#,
+      #"subset_B3"#,
+      #"subset_B4"#,
+      #"subset_B5"#,
+      #"subset_B6"#,
+      #"subset_B7"#,
+      "subset_B8"#,
+      #"cohort",
+      #"subset_B_not_risky_MME"#,
+      #"subset_B_not_risky_MME_days"#,
+      #"subset_B_not_risky_days"
+    ))
+    {
+      # shift <- case_when(subset == "subset_B_not_risky_MME" ~ "d1",
+      #                    subset == "subset_B_not_risky_MME_days" ~ "d3",
+      #                    subset == "subset_B_not_risky_days" ~ "d2"
+      #                    )
+      finished <- FALSE
       
-    set.seed(5)
-    tryCatch({
-    results <- run_lmtp(df, t, shift, subset)
-    
-    finished <- TRUE
-    
-    saveRDS(results, paste0("~/results_boost/local_lmtp_results_", shift, "_", subset, "_time_", t, ".rds"))
-    }, error = function(e){
-      cat("Error on iteration ", t, "shift: ", shift, "subset: ", subset,
-          e$message)})
+      while(!finished){ # if failed on previous iteration, try again
+        
+        set.seed(5)
+        tryCatch({
+          results <- run_lmtp(df, t, shift, subset)
+          
+          finished <- TRUE
+          
+          saveRDS(results, paste0("~/results_final/local_lmtp_results_", shift, "_", subset, "_time_", t, ".rds"))
+        }, error = function(e){
+          cat("Error on iteration ", t, "shift: ", shift, "subset: ", subset,
+              e$message)})
+      }
+      print(t)
     }
-    print(t)
   }
 }
-}
-
-# failed on d2, subset B1 at t = 2
-# failed observed, all subsets at t = 5
-# failed d3, subsets B2 and B3 at t = 5
-
