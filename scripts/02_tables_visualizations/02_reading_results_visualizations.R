@@ -225,8 +225,8 @@ results_plot_d1 <- base_plot +
                     ymin = conf.low, ymax = conf.high), width = 0.1, 
                 position = position_dodge(width = 0.5)) + 
   labs(x = "", y = "Incidence of OUD", title = "d1. Reducing MME by 20%") +
-  labs(color = "Regime",
-       shape = "Regime") + 
+  labs(color = "Treatment Regime (Subgroup)",
+       shape = "Treatment Regime (Subgroup)") + 
   theme_minimal() + 
   scale_color_manual(values = c("#2ECC71", "#F39C12", "#000000", "#7B3F3F", "#00008B", "#9B870C", "#4682B4","#E91E63")) +
   scale_shape_manual(values = c(9, 15, 1, 20, 12, 19, 0, 8)) +
@@ -294,8 +294,8 @@ results_plot_d2 <- base_plot +
                     ymin = conf.low, ymax = conf.high), width = 0.1, 
                 position = position_dodge(width = 0.5)) + 
   labs(x = "", y = "Incidence of OUD", title = "d2. Reducing Days' Supply by 20%") +
-  labs(color = "Regime",
-       shape = "Regime") + 
+  labs(color = "Treatment Regime (Subgroup)",
+       shape = "Treatment Regime (Subgroup)") + 
   theme_minimal() + 
   scale_color_manual(values = c("#2ECC71", "#F39C12","#000000", "#7B3F3F", "#00008B", "#9B870C", "#4682B4","#E91E63")) +
   scale_shape_manual(values = c(9, 15, 1, 20, 12, 19, 0, 8)) +
@@ -371,8 +371,8 @@ results_plot_d3 <- base_plot +
                     ymin = conf.low, ymax = conf.high), width = 0.1, 
                 position = position_dodge(width = 0.5)) + 
   labs(x = "", y = "Incidence of OUD", title = "d3. Reducing MME and Days' Supply by 20%") +
-  labs(color = "Regime",
-       shape = "Regime") + 
+  labs(color = "Treatment Regime (Subgroup)",
+       shape = "Treatment Regime (Subgroup)") + 
   theme_minimal() + 
   scale_color_manual(values = c("#00BBFF", "#FFCC00","#9B59B6", 
                                 "#C0392B", "#2ECC71", "#F39C12","#000000", "#7B3F3F", "#00008B", "#9B870C", "#4682B4","#E91E63")) +

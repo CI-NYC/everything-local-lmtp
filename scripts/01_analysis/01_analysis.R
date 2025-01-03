@@ -114,7 +114,7 @@ run_lmtp <- function(data, t, shift, conditional)
   } else if (shift == "d1")
   {
     shifted <- data |>
-      mutate(exposure_max_daily_dose_mme = ifelse(0.8 * exposure_max_daily_dose_mme > min(exposure_max_daily_dose_mme), 0.8 * exposure_max_daily_dose_mme, exposure_max_daily_dose_mme), # reduce MME by 20%
+      mutate(exposure_max_daily_dose_mme = ifelse(0.8 * exposure_max_daily_dose_mme >= min(exposure_max_daily_dose_mme), 0.8 * exposure_max_daily_dose_mme, exposure_max_daily_dose_mme), # reduce MME by 20%
              cens_period_1 = 1,
              cens_period_2 = 1,
              cens_period_3 = 1,
@@ -123,7 +123,7 @@ run_lmtp <- function(data, t, shift, conditional)
   } else if (shift == "d2")
   {
     shifted <- data |>
-      mutate(exposure_days_supply = ifelse(0.8 * exposure_days_supply > min(exposure_days_supply), 0.8 * exposure_days_supply, exposure_days_supply), # reduce days supplied by 20%
+      mutate(exposure_days_supply = ifelse(0.8 * exposure_days_supply >= min(exposure_days_supply), 0.8 * exposure_days_supply, exposure_days_supply), # reduce days supplied by 20%
              cens_period_1 = 1,
              cens_period_2 = 1,
              cens_period_3 = 1,
@@ -132,8 +132,8 @@ run_lmtp <- function(data, t, shift, conditional)
   }else 
   {
     shifted <- data |>
-      mutate(exposure_max_daily_dose_mme = ifelse(0.8 * exposure_max_daily_dose_mme > min(exposure_max_daily_dose_mme), 0.8 * exposure_max_daily_dose_mme, exposure_max_daily_dose_mme), # reduce MME by 20%
-             exposure_days_supply = ifelse(0.8 * exposure_days_supply > min(exposure_days_supply), 0.8 * exposure_days_supply, exposure_days_supply), # reduce days supplied by 20%
+      mutate(exposure_max_daily_dose_mme = ifelse(0.8 * exposure_max_daily_dose_mme >= min(exposure_max_daily_dose_mme), 0.8 * exposure_max_daily_dose_mme, exposure_max_daily_dose_mme), # reduce MME by 20%
+             exposure_days_supply = ifelse(0.8 * exposure_days_supply >= min(exposure_days_supply), 0.8 * exposure_days_supply, exposure_days_supply), # reduce days supplied by 20%
              cens_period_1 = 1,
              cens_period_2 = 1,
              cens_period_3 = 1,
@@ -205,7 +205,7 @@ run_lmtp <- function(data, t, shift, conditional)
 }
 
 set.seed(5)
-for(t in 1:1)
+for(t in 3:5)
 {
   for(shift in c(#"obs"#,
                 "d1"#,
@@ -216,14 +216,14 @@ for(t in 1:1)
     for(subset in c(#"subset_B1"#, 
       #"subset_B2"#,
       #"subset_B3"#,
-      "subset_B4"#,
+      #"subset_B4"#,
       #"subset_B5"#,
       #"subset_B6"#,
       #"subset_B7"#,
       #"subset_B8"#,
       #"cohort"#,
-      #"subset_B_not_risky_days",
-      #"subset_B_under_20"#,
+      #"subset_B_not_risky_days"#,
+      "subset_B_under_20"#,
       #"subset_B_days_7_dose_under_20"#,
     ))
     {
@@ -237,7 +237,7 @@ for(t in 1:1)
           
           finished <- TRUE
           
-          saveRDS(results, paste0("/mnt/general-data/disability/everything-local-lmtp/results_final", shift, "_", subset, "_time_", t, ".rds"))
+          saveRDS(results, paste0("/mnt/general-data/disability/everything-local-lmtp/results_final/", shift, "_", subset, "_time_", t, ".rds"))
         }, error = function(e){
           cat("Error on iteration ", t, "shift: ", shift, "subset: ", subset,
               e$message)})
