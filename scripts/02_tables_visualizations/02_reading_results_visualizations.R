@@ -24,7 +24,7 @@ isotonic_projection <- function(x, alpha = 0.05) {
 }
 
 read_results <- function(t, shift, conditional, path){
-  data <- readRDS((paste0("~/", path, "/local_lmtp_results_", shift, 
+  data <- readRDS((paste0("/mnt/general-data/disability/everything-local-lmtp/", path, "/local_lmtp_results_", shift, 
                           if(is.null(shift)){
                             NULL} else{
                               "_"},
@@ -36,7 +36,7 @@ contrast_results_list <- list()
 density_ratios <- list()
 
 for(i in c("subset_B1", "subset_B2", "subset_B3", "subset_B4", "subset_B5", "subset_B6", "subset_B7", "subset_B8", 
-           "subset_B_not_risky_MME", "subset_B_not_risky_days", "subset_B_not_risky_MME_days"))
+           "subset_B_under_20", "subset_B_not_risky_days", "subset_B_days_7_dose_under_20"))
 {
 
   results_shift <- list()
@@ -51,9 +51,9 @@ for(i in c("subset_B1", "subset_B2", "subset_B3", "subset_B4", "subset_B5", "sub
                      i == "subset_B6" ~ "d2",
                      i == "subset_B7" ~ "d3",
                      i == "subset_B8" ~ "d3",
-                     i == "subset_B_not_risky_MME" ~ "d1",
+                     i == "subset_B_under_20" ~ "d1",
                      i == "subset_B_not_risky_days" ~ "d2",
-                     i == "subset_B_not_risky_MME_days" ~ "d3"
+                     i == "subset_B_days_7_dose_under_20" ~ "d3"
   )
   
 for (z in c("obs", shift))
@@ -124,7 +124,7 @@ for( d in c("obs", "d1", "d2", "d3"))
   ate_results <- list()
   for (j in 1:5)
   {
-    ate_results[[j]] <- readRDS((paste0("~/", "results_final/local_lmtp_results_", d, "_cohort_time_", j, ".rds")))
+    ate_results[[j]] <- readRDS((paste0("/mnt/general-data/disability/everything-local-lmtp/results_final/local_lmtp_results_", d, "_cohort_time_", j, ".rds")))
     if (j > 1)
     {
     ate_results[[j]]$theta <- 1 - ate_results[[j]]$theta
@@ -200,7 +200,6 @@ colnames(contrasts_df_ATE) <- gsub("^vals\\.", "", colnames(contrasts_df_ATE))
 
 
 # Plots
-
 base_plot <-ggplot() +
   scale_x_discrete(limits = c("1", "2", "3", "4", "5")) + 
   theme_minimal() +
@@ -208,14 +207,14 @@ base_plot <-ggplot() +
         panel.grid.minor = element_blank())
 
 
-d1_data <- combined_results_list$subset_B1 |> mutate(shift = case_when(shift == "d1" ~ "d1 (B1_1)",
-                                                                       shift == "obs" ~ "Observed (B1_1)")) |>
-  merge(combined_results_list$subset_B4 |> mutate(shift = case_when(shift == "d1" ~ "d1 (B1_2)",
-                                                                    shift == "obs" ~ "Observed (B1_2)")), all = TRUE) |>
-  merge(combined_results_list$subset_B_not_risky_MME |> mutate(shift = case_when(shift == "d1" ~ "d1 (B1_0)",
-                                                                    shift == "obs" ~ "Observed (B1_0)")), all = TRUE) |>
+d1_data <- combined_results_list$subset_B1 |> mutate(shift = case_when(shift == "d1" ~ "d1 (MME >= 50)",
+                                                                       shift == "obs" ~ "Observed (MME >= 50)")) |>
+  merge(combined_results_list$subset_B4 |> mutate(shift = case_when(shift == "d1" ~ "d1 (MME >= 90)",
+                                                                    shift == "obs" ~ "Observed (MME >= 90)")), all = TRUE) |>
+  merge(combined_results_list$subset_B_under_20 |> mutate(shift = case_when(shift == "d1" ~ "d1 (MME <= 20)",
+                                                                                 shift == "obs" ~ "Observed (MME <= 20)")), all = TRUE) |>
   merge(combined_results_df_ATE |> filter(shift == "Observed (Cohort)" | shift == "d1 (Cohort)"), all = TRUE) |>
-  mutate(shift = factor(shift, levels = c("Observed (B1_2)", "d1 (B1_2)", "Observed (B1_1)", "d1 (B1_1)", "Observed (B1_0)", "d1 (B1_0)", "Observed (Cohort)", "d1 (Cohort)")))
+  mutate(shift = factor(shift, levels = c("Observed (MME >= 90)", "d1 (MME >= 90)", "Observed (MME >= 50)", "d1 (MME >= 50)", "Observed (Cohort)", "d1 (Cohort)", "Observed (MME <= 20)", "d1 (MME <= 20)")))
 
 
 results_plot_d1 <- base_plot +
@@ -225,17 +224,18 @@ results_plot_d1 <- base_plot +
                 aes(x = factor(t), color = shift, group = shift,
                     ymin = conf.low, ymax = conf.high), width = 0.1, 
                 position = position_dodge(width = 0.5)) + 
-  labs(x = "", y = "Incidence", title = "") +
+  labs(x = "", y = "Incidence of OUD", title = "d1. Reducing MME by 20%") +
   labs(color = "Regime",
        shape = "Regime") + 
   theme_minimal() + 
-  scale_color_manual(values = c("#2ECC71", "#F39C12", "#000000", "#7B3F3F", "#4682B4","#E91E63", "#00008B", "#9B870C")) +
-  scale_shape_manual(values = c(9, 15, 1, 16, 0, 8, 12, 19)) +
+  scale_color_manual(values = c("#2ECC71", "#F39C12", "#000000", "#7B3F3F", "#00008B", "#9B870C", "#4682B4","#E91E63")) +
+  scale_shape_manual(values = c(9, 15, 1, 20, 12, 19, 0, 8)) +
   scale_x_discrete(limits = c("1", "2", "3", "4", "5")) +
   scale_y_continuous(limits = c(0, 0.1),
                      labels = label_number(accuracy = 0.0001)) +
   theme(
-    legend.position =  c(0.2, 0.9),
+    plot.title = element_text(hjust = 0, size = 10),
+    legend.position =  c(0.3, 0.85),
     legend.key.height = unit(0.4, "lines"),
     legend.key.width = unit(2, "lines"),
     legend.text = element_text(size = 6),
@@ -246,11 +246,11 @@ results_plot_d1 <- base_plot +
     plot.margin = unit(c(5.5, 5.5, 5.5, 9.5), "pt")
   )
 
-d1_data_contrast <- contrast_results_list$subset_B1 |> mutate(contrast = "d1 v. Observed (B1_1)") |>
-  merge(contrast_results_list$subset_B4 |> mutate(contrast = "d1 v. Observed (B1_2)"), all = TRUE) |>
-  merge(contrast_results_list$subset_B_not_risky_MME |> mutate(contrast = "d1 v. Observed (B1_0)"), all = TRUE) |>
+d1_data_contrast <- contrast_results_list$subset_B1 |> mutate(contrast = "d1 v. Observed (MME >= 50)") |>
+  merge(contrast_results_list$subset_B4 |> mutate(contrast = "d1 v. Observed (MME >= 90)"), all = TRUE) |>
+  merge(contrast_results_list$subset_B_under_20 |> mutate(contrast = "d1 v. Observed (MME <= 20)"), all = TRUE) |>
   merge(contrasts_df_ATE |> filter(contrast == "d1 v. obs") |> mutate(contrast = "d1 v. Observed (Cohort)"), all = TRUE) |>
-  mutate(contrast = factor(contrast, levels = c("d1 v. Observed (B1_2)", "d1 v. Observed (B1_1)", "d1 v. Observed (B1_0)", "d1 v. Observed (Cohort)")))
+  mutate(contrast = factor(contrast, levels = c("d1 v. Observed (MME >= 90)", "d1 v. Observed (MME >= 50)", "d1 v. Observed (Cohort)", "d1 v. Observed (MME <= 20)")))
 
 contrast_plot_d1 <- ggplot(data = d1_data_contrast, aes(x = factor(t), y = theta, color = contrast, group = contrast, shape = contrast)) +
   geom_point(position = position_dodge(width = 0.5)) + 
@@ -258,10 +258,10 @@ contrast_plot_d1 <- ggplot(data = d1_data_contrast, aes(x = factor(t), y = theta
                 position = position_dodge(width = 0.5)) +
   labs(x = "Time Period (3 month intervals)", y = "Risk Difference (v. Observed)", title = "") +
   geom_hline(yintercept = 0, linetype = "dashed", color = "black") +
-  scale_color_manual(values = c("#F39C12", "#7B3F3F", "#E91E63", "#9B870C")) +
-  scale_shape_manual(values = c(15, 16, 8, 19)) +
+  scale_color_manual(values = c("#F39C12", "#7B3F3F", "#9B870C", "#E91E63")) +
+  scale_shape_manual(values = c(15, 20, 19, 8)) +
   scale_x_discrete(limits = c("1", "2", "3", "4", "5")) + 
-  scale_y_continuous(limits = c(-0.035, 0.0025),
+  scale_y_continuous(limits = c(-0.036, 0.0025),
                      labels = label_number(accuracy = 0.0001)) + 
   labs(color = "Regime Contrast") + 
   theme_minimal() +
@@ -273,16 +273,17 @@ plots_d1 <- ggarrange(results_plot_d1,
                       align = "h",
                       nrow = 2)
 
-d2_data <- combined_results_list$subset_B2 |> mutate(shift = case_when(shift == "d2" ~ "d2 (B2_1)",
-                                                                       shift == "obs" ~ "Observed (B2_1)")) |>
-  merge(combined_results_list$subset_B6 |> mutate(shift = case_when(shift == "d2" ~ "d2 (B2_2)",
-                                                                    shift == "obs" ~ "Observed (B2_2)")), all = TRUE) |>
-  merge(combined_results_list$subset_B_not_risky_days |> mutate(shift = case_when(shift == "d2" ~ "d2 (B2_0)",
-                                                                                 shift == "obs" ~ "Observed (B2_0)")), all = TRUE) |>
+d2_data <- combined_results_list$subset_B2 |> mutate(shift = case_when(shift == "d2" ~ "d2 (Days > 7)",
+                                                                       shift == "obs" ~ "Observed (Days > 7)")) |>
+  merge(combined_results_list$subset_B6 |> mutate(shift = case_when(shift == "d2" ~ "d2 (Days > 30)",
+                                                                    shift == "obs" ~ "Observed (Days > 30)")), all = TRUE) |>
+  merge(combined_results_list$subset_B_not_risky_days |> mutate(shift = case_when(shift == "d2" ~ "d2 (Days <= 7)",
+                                                                                  shift == "obs" ~ "Observed (Days <= 7)")), all = TRUE) |>
   merge(combined_results_df_ATE |> filter(shift == "Observed (Cohort)" | shift == "d2 (Cohort)"), all = TRUE) |>
-  mutate(shift = factor(shift, levels = c("Observed (B2_2)", "d2 (B2_2)", "Observed (B2_1)", "d2 (B2_1)", 
-                                          "Observed (B2_0)", "d2 (B2_0)", 
-                                          "Observed (Cohort)", "d2 (Cohort)")))
+  mutate(shift = factor(shift, levels = c("Observed (Days > 30)", "d2 (Days > 30)", 
+                                          "Observed (Days > 7)", "d2 (Days > 7)", 
+                                          "Observed (Cohort)", "d2 (Cohort)",
+                                          "Observed (Days <= 7)", "d2 (Days <= 7)")))
 
 
 results_plot_d2 <- base_plot +
@@ -292,17 +293,18 @@ results_plot_d2 <- base_plot +
                 aes(x = factor(t), color = shift, group = shift,
                     ymin = conf.low, ymax = conf.high), width = 0.1, 
                 position = position_dodge(width = 0.5)) + 
-  labs(x = "", y = "Incidence", title = "") +
+  labs(x = "", y = "Incidence of OUD", title = "d2. Reducing Days' Supply by 20%") +
   labs(color = "Regime",
        shape = "Regime") + 
   theme_minimal() + 
-  scale_color_manual(values = c("#2ECC71", "#F39C12","#000000", "#7B3F3F", "#4682B4","#E91E63", "#00008B", "#9B870C")) +
-  scale_shape_manual(values = c(9, 15, 1, 16, 0, 8, 12, 19)) +
+  scale_color_manual(values = c("#2ECC71", "#F39C12","#000000", "#7B3F3F", "#00008B", "#9B870C", "#4682B4","#E91E63")) +
+  scale_shape_manual(values = c(9, 15, 1, 20, 12, 19, 0, 8)) +
   scale_x_discrete(limits = c("1", "2", "3", "4", "5")) +
   scale_y_continuous(limits = c(0, 0.1),
                      labels = label_number(accuracy = 0.0001)) +
   theme(
-    legend.position =  c(0.2, 0.9),
+    plot.title = element_text(hjust = 0, size = 10),
+    legend.position =  c(0.3, 0.85),
     legend.key.height = unit(0.4, "lines"),
     legend.key.width = unit(2, "lines"),
     legend.text = element_text(size = 6),
@@ -313,13 +315,13 @@ results_plot_d2 <- base_plot +
     plot.margin = unit(c(5.5, 5.5, 5.5, 9.5), "pt")
   )
 
-d2_data_contrast <- contrast_results_list$subset_B2 |> mutate(contrast = "d2 v. Observed (B2_1)") |>
-  merge(contrast_results_list$subset_B6 |> mutate(contrast = "d2 v. Observed (B2_2)"), all = TRUE) |>
-  merge(contrast_results_list$subset_B_not_risky_days |> mutate(contrast = "d2 v. Observed (B2_0)"), all = TRUE) |>
+d2_data_contrast <- contrast_results_list$subset_B2 |> mutate(contrast = "d2 v. Observed (Days > 7)") |>
+  merge(contrast_results_list$subset_B6 |> mutate(contrast = "d2 v. Observed (Days > 30)"), all = TRUE) |>
+  merge(contrast_results_list$subset_B_not_risky_days |> mutate(contrast = "d2 v. Observed (Days <= 7)"), all = TRUE) |>
   merge(contrasts_df_ATE |> filter(contrast == "d2 v. obs") |> mutate(contrast = "d2 v. Observed (Cohort)"), all = TRUE) |>
-  mutate(contrast = factor(contrast, levels = c("d2 v. Observed (B2_2)", "d2 v. Observed (B2_1)", 
-                                                "d2 v. Observed (B2_0)",
-                                                "d2 v. Observed (Cohort)")))
+  mutate(contrast = factor(contrast, levels = c("d2 v. Observed (Days > 30)", "d2 v. Observed (Days > 7)",
+                                                "d2 v. Observed (Cohort)",
+                                                "d2 v. Observed (Days <= 7)")))
 
 contrast_plot_d2 <- ggplot(data = d2_data_contrast, aes(x = factor(t), y = theta, color = contrast, group = contrast, shape = contrast)) +
   geom_point(position = position_dodge(width = 0.5)) + 
@@ -327,10 +329,10 @@ contrast_plot_d2 <- ggplot(data = d2_data_contrast, aes(x = factor(t), y = theta
                 position = position_dodge(width = 0.5)) +
   labs(x = "Time Period (3 month intervals)", y = "Risk Difference (v. Observed)", title = "") +
   geom_hline(yintercept = 0, linetype = "dashed", color = "black") +
-  scale_color_manual(values = c("#F39C12", "#7B3F3F", "#E91E63", "#9B870C")) +
-  scale_shape_manual(values = c(15, 16, 8, 19)) +
+  scale_color_manual(values = c("#F39C12", "#7B3F3F", "#9B870C", "#E91E63")) +
+  scale_shape_manual(values = c(15, 20, 19, 8)) +
   scale_x_discrete(limits = c("1", "2", "3", "4", "5")) + 
-  scale_y_continuous(limits = c(-0.035, 0.0025),
+  scale_y_continuous(limits = c(-0.036, 0.0025),
                      labels = label_number(accuracy = 0.0001)) + 
   labs(color = "Regime Contrast") + 
   theme_minimal() +
@@ -342,23 +344,23 @@ plots_d2 <- ggarrange(results_plot_d2,
                       align = "h",
                       nrow = 2)
 
-d3_data <- combined_results_list$subset_B3 |> mutate(shift = case_when(shift == "d3" ~ "d3 (B3_1)",
-                                                                       shift == "obs" ~ "Observed (B3_1)")) |>
-  merge(combined_results_list$subset_B5 |> mutate(shift = case_when(shift == "d3" ~ "d3 (B3_2)",
-                                                                    shift == "obs" ~ "Observed (B3_2)")), all = TRUE) |>
-  merge(combined_results_list$subset_B7 |> mutate(shift = case_when(shift == "d3" ~ "d3 (B3_3)",
-                                                                    shift == "obs" ~ "Observed (B3_3)")), all = TRUE) |>
-  merge(combined_results_list$subset_B8 |> mutate(shift = case_when(shift == "d3" ~ "d3 (B3_4)",
-                                                                    shift == "obs" ~ "Observed (B3_4)")), all = TRUE) |>
-  merge(combined_results_list$subset_B_not_risky_MME_days |> mutate(shift = case_when(shift == "d3" ~ "d3 (B3_0)",
-                                                                    shift == "obs" ~ "Observed (B3_0)")), all = TRUE) |>
+d3_data <- combined_results_list$subset_B3 |> mutate(shift = case_when(shift == "d3" ~ "d3 (MME >= 50, Days > 7)",
+                                                                       shift == "obs" ~ "Observed (MME >= 50, Days > 7)")) |>
+  merge(combined_results_list$subset_B5 |> mutate(shift = case_when(shift == "d3" ~ "d3 (MME >= 90, Days > 7)",
+                                                                    shift == "obs" ~ "Observed (MME >= 90, Days > 7)")), all = TRUE) |>
+  merge(combined_results_list$subset_B7 |> mutate(shift = case_when(shift == "d3" ~ "d3 (MME >= 50, Days > 30)",
+                                                                    shift == "obs" ~ "Observed (MME >= 50, Days > 30)")), all = TRUE) |>
+  merge(combined_results_list$subset_B8 |> mutate(shift = case_when(shift == "d3" ~ "d3 (MME >= 90, Days > 30)",
+                                                                    shift == "obs" ~ "Observed (MME >= 90, Days > 30)")), all = TRUE) |>
+  merge(combined_results_list$subset_B_days_7_dose_under_20 |> mutate(shift = case_when(shift == "d3" ~ "d3 (MME <= 20, Days <= 7)",
+                                                                                      shift == "obs" ~ "Observed (MME <= 20, Days <= 7)")), all = TRUE) |>
   merge(combined_results_df_ATE |> filter(shift == "Observed (Cohort)" | shift == "d3 (Cohort)"), all = TRUE) |>
-  mutate(shift = factor(shift, levels = c("Observed (B3_4)", "d3 (B3_4)", 
-                                          "Observed (B3_3)", "d3 (B3_3)", 
-                                          "Observed (B3_2)", "d3 (B3_2)", 
-                                          "Observed (B3_1)", "d3 (B3_1)", 
-                                          "Observed (B3_0)", "d3 (B3_0)", 
-                                          "Observed (Cohort)", "d3 (Cohort)")))
+  mutate(shift = factor(shift, levels = c("Observed (MME >= 90, Days > 30)", "d3 (MME >= 90, Days > 30)", 
+                                          "Observed (MME >= 50, Days > 30)", "d3 (MME >= 50, Days > 30)", 
+                                          "Observed (MME >= 90, Days > 7)", "d3 (MME >= 90, Days > 7)", 
+                                          "Observed (MME >= 50, Days > 7)", "d3 (MME >= 50, Days > 7)", 
+                                          "Observed (Cohort)", "d3 (Cohort)",
+                                          "Observed (MME <= 20, Days <= 7)", "d3 (MME <= 20, Days <= 7)")))
 
 
 results_plot_d3 <- base_plot +
@@ -368,19 +370,20 @@ results_plot_d3 <- base_plot +
                 aes(x = factor(t), color = shift, group = shift,
                     ymin = conf.low, ymax = conf.high), width = 0.1, 
                 position = position_dodge(width = 0.5)) + 
-  labs(x = "", y = "Incidence", title = "") +
+  labs(x = "", y = "Incidence of OUD", title = "d3. Reducing MME and Days' Supply by 20%") +
   labs(color = "Regime",
        shape = "Regime") + 
   theme_minimal() + 
   scale_color_manual(values = c("#00BBFF", "#FFCC00","#9B59B6", 
-                                "#C0392B", "#2ECC71", "#F39C12","#000000", "#7B3F3F", "#4682B4","#E91E63", "#00008B", "#9B870C")) +
-  scale_shape_manual(values = c(6, 16, 5, 
-                                18, 9, 15, 1, 16, 0, 8, 12, 19)) +
+                                "#C0392B", "#2ECC71", "#F39C12","#000000", "#7B3F3F", "#00008B", "#9B870C", "#4682B4","#E91E63")) +
+  scale_shape_manual(values = c(6, 17, 5, 
+                                18, 9, 15, 1, 20, 12, 19, 0, 8)) +
   scale_x_discrete(limits = c("1", "2", "3", "4", "5")) +
   scale_y_continuous(limits = c(0, 0.1),
                      labels = label_number(accuracy = 0.0001)) +
   theme(
-    legend.position =  c(0.2, 0.9),
+    plot.title = element_text(hjust = 0, size = 10),
+    legend.position =  c(0.3, 0.85),
     legend.key.height = unit(0.4, "lines"),
     legend.key.width = unit(2, "lines"),
     legend.text = element_text(size = 6),
@@ -391,15 +394,16 @@ results_plot_d3 <- base_plot +
     plot.margin = unit(c(5.5, 5.5, 5.5, 9.5), "pt")
   )
 
-d3_data_contrast <- contrast_results_list$subset_B3 |> mutate(contrast = "d3 v. Observed (B3_1)") |>
-  merge(contrast_results_list$subset_B5 |> mutate(contrast = "d3 v. Observed (B3_2)"), all = TRUE) |>
-  merge(contrast_results_list$subset_B7 |> mutate(contrast = "d3 v. Observed (B3_3)"), all = TRUE) |>
-  merge(contrast_results_list$subset_B8 |> mutate(contrast = "d3 v. Observed (B3_4)"), all = TRUE) |>
-  merge(contrast_results_list$subset_B_not_risky_MME_days |> mutate(contrast = "d3 v. Observed (B3_0)"), all = TRUE) |>
+d3_data_contrast <- contrast_results_list$subset_B3 |> mutate(contrast = "d3 v. Observed (MME >= 50, Days > 7)") |>
+  merge(contrast_results_list$subset_B5 |> mutate(contrast = "d3 v. Observed (MME >= 90, Days > 7)"), all = TRUE) |>
+  merge(contrast_results_list$subset_B7 |> mutate(contrast = "d3 v. Observed MME >= 50, Days > 30)"), all = TRUE) |>
+  merge(contrast_results_list$subset_B8 |> mutate(contrast = "d3 v. Observed (MME >= 90, Days > 30)"), all = TRUE) |>
+  merge(contrast_results_list$subset_B_days_7_dose_under_20 |> mutate(contrast = "d3 v. Observed (MME <= 20, Days <= 7)"), all = TRUE) |>
   merge(contrasts_df_ATE |> filter(contrast == "d3 v. obs") |> mutate(contrast = "d3 v. Observed (Cohort)"), all = TRUE) |>
-  mutate(contrast = factor(contrast, levels = c("d3 v. Observed (B3_4)", "d3 v. Observed (B3_3)", 
-                                                "d3 v. Observed (B3_2)", "d3 v. Observed (B3_1)", 
-                                                "d3 v. Observed (B3_0)","d3 v. Observed (Cohort)")))
+  mutate(contrast = factor(contrast, levels = c("d3 v. Observed (MME >= 90, Days > 30)", "d3 v. Observed MME >= 50, Days > 30)", 
+                                                "d3 v. Observed (MME >= 90, Days > 7)", "d3 v. Observed (MME >= 50, Days > 7)", 
+                                                "d3 v. Observed (Cohort)",
+                                                "d3 v. Observed (MME <= 20, Days <= 7)")))
 
 contrast_plot_d3 <- ggplot(data = d3_data_contrast, aes(x = factor(t), y = theta, color = contrast, group = contrast, shape = contrast)) +
   geom_point(position = position_dodge(width = 0.5)) + 
@@ -408,11 +412,11 @@ contrast_plot_d3 <- ggplot(data = d3_data_contrast, aes(x = factor(t), y = theta
   labs(x = "Time Period (3 month intervals)", y = "Risk Difference (v. Observed)", title = "") +
   geom_hline(yintercept = 0, linetype = "dashed", color = "black") +
   scale_color_manual(values = c("#FFCC00", 
-    "#C0392B", "#F39C12", "#7B3F3F", "#E91E63", "#9B870C")) +
-  scale_shape_manual(values = c(16, 
-    18, 15, 16, 8, 19)) +
+                                "#C0392B", "#F39C12", "#7B3F3F", "#9B870C", "#E91E63")) +
+  scale_shape_manual(values = c(17, 
+                                18, 15, 20, 19, 8)) +
   scale_x_discrete(limits = c("1", "2", "3", "4", "5")) + 
-  scale_y_continuous(limits = c(-0.035, 0.0025),
+  scale_y_continuous(limits = c(-0.036, 0.0025),
                      labels = label_number(accuracy = 0.0001)) + 
   labs(color = "Regime Contrast") + 
   theme_minimal() +
@@ -425,9 +429,11 @@ plots_d3 <- ggarrange(results_plot_d3,
                       nrow = 2)
 
 primary_plot <- ggarrange(plots_d1, plots_d2, plots_d3,
-          align = "h",
-          labels = c("d1", "d2", "d3"),
-          nrow = 1) + 
+                          align = "h",
+                          #labels = c("d1. Reducing MME by 20%                 ", "d2. Reducing Days' Supply by 20%        ", "d3. Reducing MME and Days' Supply by 20%"),
+                          label.x = -0.2,
+                          font.label = list(size = 10),
+                          nrow = 1) + 
   annotation_custom(
     grob = grid.lines(x = c(1/3, 1/3), y = c(0, 1), gp = gpar(col = "black", lwd = 1.5))
   ) +
@@ -438,8 +444,17 @@ primary_plot <- ggarrange(plots_d1, plots_d2, plots_d3,
 ggsave(plot = primary_plot, filename = here::here("figures/primary_figure_final.pdf"),
        width = 12, height = 9, dpi = 300, units = "in")
 
-# ggsave(plot = primary_plot, filename = "~/everything-local-lmtp/figures/primary_figure.pdf",
-#        width = 12, height = 9, dpi = 300, units = "in")
+# adding ATE
+contrast_results_list$cohort <- contrasts_df_ATE
+combined_results_list$cohort <- combined_results_df_ATE |>
+  mutate(shift = case_when(shift == "Observed (Cohort)" ~ "obs",
+                           shift == "d1 (Cohort)" ~ "d1",
+                           shift == "d2 (Cohort)" ~ "d2",
+                           shift == "d3 (Cohort)" ~ "d3"
+                           ))
 
+
+saveRDS(contrast_results_list, here::here("results/primary_contrast_results_list.rds"))
+saveRDS(combined_results_list, here::here("results/primary_combined_results_list.rds"))
 
 

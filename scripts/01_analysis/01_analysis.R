@@ -25,11 +25,10 @@ df <- fst::read_fst(paste0(drv_root ,"msk_cohort_clean_imputed.fst")) |>
          subset_B7 = ifelse(exposure_days_supply > 30 & exposure_max_daily_dose_mme >= 50, TRUE, FALSE),
          subset_B8 = ifelse(exposure_days_supply > 30 & exposure_max_daily_dose_mme >= 90, TRUE, FALSE)
   ) |>
-  mutate(subset_B_not_risky_MME = ifelse(exposure_max_daily_dose_mme < 50, TRUE, FALSE),
-         subset_B_not_risky_MME_days = ifelse(exposure_max_daily_dose_mme < 50 & exposure_days_supply <= 7, TRUE, FALSE),
-         subset_B_not_risky_days = ifelse(exposure_days_supply <= 7, TRUE, FALSE),
-         subset_cohort = TRUE
-  )
+  mutate(subset_B_not_risky_days = ifelse(exposure_days_supply <= 7, TRUE, FALSE),
+         subset_B_under_20 = ifelse(exposure_max_daily_dose_mme <= 20, TRUE, FALSE),
+         subset_B_days_7_dose_under_20 = ifelse(exposure_days_supply <= 7 & exposure_max_daily_dose_mme <= 20, TRUE, FALSE),
+         subset_cohort = TRUE)
 
 W <- c(
   "dem_age",
@@ -107,6 +106,8 @@ run_lmtp <- function(data, t, shift, conditional)
       as.matrix()
   }
   
+  if(conditional %in% c("cohort", "subset_B_not_risky_days", "subset_B_under_20", "subset_B_days_7_dose_under_20"))
+  {
   if(shift == "obs")
   {
     shifted <- NULL
@@ -139,6 +140,42 @@ run_lmtp <- function(data, t, shift, conditional)
              cens_period_4 = 1,
              cens_period_5 = 1)
   } 
+  } else
+  {
+    if(shift == "obs")
+    {
+      shifted <- NULL
+    } else if (shift == "d1")
+    {
+      shifted <- data |>
+        mutate(exposure_max_daily_dose_mme = 0.8 * exposure_max_daily_dose_mme, # reduce MME by 20%
+               cens_period_1 = 1,
+               cens_period_2 = 1,
+               cens_period_3 = 1,
+               cens_period_4 = 1,
+               cens_period_5 = 1)
+    } else if (shift == "d2")
+    {
+      shifted <- data |>
+        mutate(exposure_days_supply =  0.8 * exposure_days_supply, # reduce days supplied by 20%
+               cens_period_1 = 1,
+               cens_period_2 = 1,
+               cens_period_3 = 1,
+               cens_period_4 = 1,
+               cens_period_5 = 1)
+    }else 
+    {
+      shifted <- data |>
+        mutate(exposure_max_daily_dose_mme = 0.8 * exposure_max_daily_dose_mme, # reduce MME by 20%
+               exposure_days_supply = 0.8 * exposure_days_supply, # reduce days supplied by 20%
+               cens_period_1 = 1,
+               cens_period_2 = 1,
+               cens_period_3 = 1,
+               cens_period_4 = 1,
+               cens_period_5 = 1)
+    }
+    
+  }
   
   est <- progressr::with_progress(lmtp_tmle(data = data,
                                             trt = list(c("exposure_max_daily_dose_mme", "exposure_days_supply")),
@@ -168,32 +205,28 @@ run_lmtp <- function(data, t, shift, conditional)
 }
 
 set.seed(5)
-for(t in 5:5)
+for(t in 1:1)
 {
-  for(shift in c("obs"#,
-                #"d1"#,
+  for(shift in c(#"obs"#,
+                "d1"#,
                  #"d2"#,
-                 #"d3"
+                 #"d3"#,
   ))
-  { # NEED TO RUN 8 under observation (not_risky_MME_days under day 1); 
+  { 
     for(subset in c(#"subset_B1"#, 
       #"subset_B2"#,
       #"subset_B3"#,
-      #"subset_B4"#,
+      "subset_B4"#,
       #"subset_B5"#,
       #"subset_B6"#,
       #"subset_B7"#,
-      "subset_B8"#,
-      #"cohort",
-      #"subset_B_not_risky_MME"#,
-      #"subset_B_not_risky_MME_days"#,
-      #"subset_B_not_risky_days"
+      #"subset_B8"#,
+      #"cohort"#,
+      #"subset_B_not_risky_days",
+      #"subset_B_under_20"#,
+      #"subset_B_days_7_dose_under_20"#,
     ))
     {
-      # shift <- case_when(subset == "subset_B_not_risky_MME" ~ "d1",
-      #                    subset == "subset_B_not_risky_MME_days" ~ "d3",
-      #                    subset == "subset_B_not_risky_days" ~ "d2"
-      #                    )
       finished <- FALSE
       
       while(!finished){ # if failed on previous iteration, try again
@@ -204,7 +237,7 @@ for(t in 5:5)
           
           finished <- TRUE
           
-          saveRDS(results, paste0("~/results_final/local_lmtp_results_", shift, "_", subset, "_time_", t, ".rds"))
+          saveRDS(results, paste0("/mnt/general-data/disability/everything-local-lmtp/results_final", shift, "_", subset, "_time_", t, ".rds"))
         }, error = function(e){
           cat("Error on iteration ", t, "shift: ", shift, "subset: ", subset,
               e$message)})
