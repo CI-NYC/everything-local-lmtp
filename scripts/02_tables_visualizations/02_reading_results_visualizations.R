@@ -212,24 +212,24 @@ d1_data <- combined_results_list$subset_B1 |> mutate(shift = case_when(shift == 
   merge(combined_results_list$subset_B4 |> mutate(shift = case_when(shift == "d1" ~ "d1 (MME >= 90)",
                                                                     shift == "obs" ~ "Observed (MME >= 90)")), all = TRUE) |>
   merge(combined_results_list$subset_B_under_20 |> mutate(shift = case_when(shift == "d1" ~ "d1 (MME <= 20)",
-                                                                                 shift == "obs" ~ "Observed (MME <= 20)")), all = TRUE) |>
+                                                                            shift == "obs" ~ "Observed (MME <= 20)")), all = TRUE) |>
   merge(combined_results_df_ATE |> filter(shift == "Observed (Cohort)" | shift == "d1 (Cohort)"), all = TRUE) |>
   mutate(shift = factor(shift, levels = c("Observed (MME >= 90)", "d1 (MME >= 90)", "Observed (MME >= 50)", "d1 (MME >= 50)", "Observed (Cohort)", "d1 (Cohort)", "Observed (MME <= 20)", "d1 (MME <= 20)")))
 
 
 results_plot_d1 <- base_plot +
   geom_point(data = d1_data, aes(x = factor(t), y = estimate, color = shift, group = shift, shape = shift),
-             position = position_dodge(width = 0.5)) +
+             position = position_dodge(width = 0.75)) +
   geom_errorbar(data = d1_data, 
                 aes(x = factor(t), color = shift, group = shift,
                     ymin = conf.low, ymax = conf.high), width = 0.1, 
-                position = position_dodge(width = 0.5)) + 
+                position = position_dodge(width = 0.75)) + 
   labs(x = "", y = "Incidence of OUD", title = "d1. Reducing MME by 20%") +
   labs(color = "Treatment Regime (Subgroup)",
        shape = "Treatment Regime (Subgroup)") + 
   theme_minimal() + 
-  scale_color_manual(values = c("#2ECC71", "#F39C12", "#000000", "#7B3F3F", "#00008B", "#9B870C", "#4682B4","#E91E63")) +
-  scale_shape_manual(values = c(9, 15, 1, 20, 12, 19, 0, 8)) +
+  scale_color_manual(values = c("#2E8B57", "#2E8B57", "#000000", "#000000", "#6495ED", "#6495ED", "#FF7F00","#FF7F00")) +
+  scale_shape_manual(values = c(9, 18, 1, 19, 12, 15, 13, 8)) +
   scale_x_discrete(limits = c("1", "2", "3", "4", "5")) +
   scale_y_continuous(limits = c(0, 0.1),
                      labels = label_number(accuracy = 0.0001)) +
@@ -253,13 +253,13 @@ d1_data_contrast <- contrast_results_list$subset_B1 |> mutate(contrast = "d1 v. 
   mutate(contrast = factor(contrast, levels = c("d1 v. Observed (MME >= 90)", "d1 v. Observed (MME >= 50)", "d1 v. Observed (Cohort)", "d1 v. Observed (MME <= 20)")))
 
 contrast_plot_d1 <- ggplot(data = d1_data_contrast, aes(x = factor(t), y = theta, color = contrast, group = contrast, shape = contrast)) +
-  geom_point(position = position_dodge(width = 0.5)) + 
+  geom_point(position = position_dodge(width = 0.75)) + 
   geom_errorbar(aes(ymin = conf.low, ymax = conf.high), width = 0.1, 
-                position = position_dodge(width = 0.5)) +
+                position = position_dodge(width = 0.75)) +
   labs(x = "Time Period (3 month intervals)", y = "Risk Difference (v. Observed)", title = "") +
   geom_hline(yintercept = 0, linetype = "dashed", color = "black") +
-  scale_color_manual(values = c("#F39C12", "#7B3F3F", "#9B870C", "#E91E63")) +
-  scale_shape_manual(values = c(15, 20, 19, 8)) +
+  scale_color_manual(values = c("#2E8B57","#000000", "#6495ED", "#FF7F00")) +
+  scale_shape_manual(values = c(18, 19, 15, 8)) +
   scale_x_discrete(limits = c("1", "2", "3", "4", "5")) + 
   scale_y_continuous(limits = c(-0.036, 0.0025),
                      labels = label_number(accuracy = 0.0001)) + 
@@ -288,17 +288,17 @@ d2_data <- combined_results_list$subset_B2 |> mutate(shift = case_when(shift == 
 
 results_plot_d2 <- base_plot +
   geom_point(data = d2_data, aes(x = factor(t), y = estimate, color = shift, group = shift, shape = shift),
-             position = position_dodge(width = 0.5)) +
+             position = position_dodge(width = 0.75)) +
   geom_errorbar(data = d2_data, 
                 aes(x = factor(t), color = shift, group = shift,
                     ymin = conf.low, ymax = conf.high), width = 0.1, 
-                position = position_dodge(width = 0.5)) + 
+                position = position_dodge(width = 0.75)) + 
   labs(x = "", y = "Incidence of OUD", title = "d2. Reducing Days' Supply by 20%") +
   labs(color = "Treatment Regime (Subgroup)",
        shape = "Treatment Regime (Subgroup)") + 
   theme_minimal() + 
-  scale_color_manual(values = c("#2ECC71", "#F39C12","#000000", "#7B3F3F", "#00008B", "#9B870C", "#4682B4","#E91E63")) +
-  scale_shape_manual(values = c(9, 15, 1, 20, 12, 19, 0, 8)) +
+  scale_color_manual(values = c("#2E8B57", "#2E8B57", "#000000", "#000000", "#6495ED", "#6495ED", "#FF7F00","#FF7F00")) +
+  scale_shape_manual(values = c(9, 18, 1, 19, 12, 15, 13, 8)) +
   scale_x_discrete(limits = c("1", "2", "3", "4", "5")) +
   scale_y_continuous(limits = c(0, 0.1),
                      labels = label_number(accuracy = 0.0001)) +
@@ -324,13 +324,13 @@ d2_data_contrast <- contrast_results_list$subset_B2 |> mutate(contrast = "d2 v. 
                                                 "d2 v. Observed (Days <= 7)")))
 
 contrast_plot_d2 <- ggplot(data = d2_data_contrast, aes(x = factor(t), y = theta, color = contrast, group = contrast, shape = contrast)) +
-  geom_point(position = position_dodge(width = 0.5)) + 
+  geom_point(position = position_dodge(width = 0.75)) + 
   geom_errorbar(aes(ymin = conf.low, ymax = conf.high), width = 0.1, 
-                position = position_dodge(width = 0.5)) +
+                position = position_dodge(width = 0.75)) +
   labs(x = "Time Period (3 month intervals)", y = "Risk Difference (v. Observed)", title = "") +
   geom_hline(yintercept = 0, linetype = "dashed", color = "black") +
-  scale_color_manual(values = c("#F39C12", "#7B3F3F", "#9B870C", "#E91E63")) +
-  scale_shape_manual(values = c(15, 20, 19, 8)) +
+  scale_color_manual(values = c("#2E8B57","#000000", "#6495ED", "#FF7F00")) +
+  scale_shape_manual(values = c(18, 19, 15, 8)) +
   scale_x_discrete(limits = c("1", "2", "3", "4", "5")) + 
   scale_y_continuous(limits = c(-0.036, 0.0025),
                      labels = label_number(accuracy = 0.0001)) + 
@@ -353,7 +353,7 @@ d3_data <- combined_results_list$subset_B3 |> mutate(shift = case_when(shift == 
   merge(combined_results_list$subset_B8 |> mutate(shift = case_when(shift == "d3" ~ "d3 (MME >= 90, Days > 30)",
                                                                     shift == "obs" ~ "Observed (MME >= 90, Days > 30)")), all = TRUE) |>
   merge(combined_results_list$subset_B_days_7_dose_under_20 |> mutate(shift = case_when(shift == "d3" ~ "d3 (MME <= 20, Days <= 7)",
-                                                                                      shift == "obs" ~ "Observed (MME <= 20, Days <= 7)")), all = TRUE) |>
+                                                                                        shift == "obs" ~ "Observed (MME <= 20, Days <= 7)")), all = TRUE) |>
   merge(combined_results_df_ATE |> filter(shift == "Observed (Cohort)" | shift == "d3 (Cohort)"), all = TRUE) |>
   mutate(shift = factor(shift, levels = c("Observed (MME >= 90, Days > 30)", "d3 (MME >= 90, Days > 30)", 
                                           "Observed (MME >= 50, Days > 30)", "d3 (MME >= 50, Days > 30)", 
@@ -365,19 +365,19 @@ d3_data <- combined_results_list$subset_B3 |> mutate(shift = case_when(shift == 
 
 results_plot_d3 <- base_plot +
   geom_point(data = d3_data, aes(x = factor(t), y = estimate, color = shift, group = shift, shape = shift),
-             position = position_dodge(width = 0.5)) +
+             position = position_dodge(width = 0.75)) +
   geom_errorbar(data = d3_data, 
                 aes(x = factor(t), color = shift, group = shift,
                     ymin = conf.low, ymax = conf.high), width = 0.1, 
-                position = position_dodge(width = 0.5)) + 
+                position = position_dodge(width = 0.75)) + 
   labs(x = "", y = "Incidence of OUD", title = "d3. Reducing MME and Days' Supply by 20%") +
   labs(color = "Treatment Regime (Subgroup)",
        shape = "Treatment Regime (Subgroup)") + 
   theme_minimal() + 
-  scale_color_manual(values = c("#00BBFF", "#FFCC00","#9B59B6", 
-                                "#C0392B", "#2ECC71", "#F39C12","#000000", "#7B3F3F", "#00008B", "#9B870C", "#4682B4","#E91E63")) +
-  scale_shape_manual(values = c(6, 17, 5, 
-                                18, 9, 15, 1, 20, 12, 19, 0, 8)) +
+  scale_color_manual(values = c("#DAA520", "#DAA520","#C0392B", 
+                                "#C0392B", "#2E8B57", "#2E8B57","#000000", "#000000", "#6495ED", "#6495ED", "#FF7F00","#FF7F00")) +
+  scale_shape_manual(values = c(2, 17, 10, 
+                                3, 9, 18, 1, 19, 12, 15, 13, 8)) +
   scale_x_discrete(limits = c("1", "2", "3", "4", "5")) +
   scale_y_continuous(limits = c(0, 0.1),
                      labels = label_number(accuracy = 0.0001)) +
@@ -406,15 +406,14 @@ d3_data_contrast <- contrast_results_list$subset_B3 |> mutate(contrast = "d3 v. 
                                                 "d3 v. Observed (MME <= 20, Days <= 7)")))
 
 contrast_plot_d3 <- ggplot(data = d3_data_contrast, aes(x = factor(t), y = theta, color = contrast, group = contrast, shape = contrast)) +
-  geom_point(position = position_dodge(width = 0.5)) + 
+  geom_point(position = position_dodge(width = 0.75)) + 
   geom_errorbar(aes(ymin = conf.low, ymax = conf.high), width = 0.1, 
-                position = position_dodge(width = 0.5)) +
+                position = position_dodge(width = 0.75)) +
   labs(x = "Time Period (3 month intervals)", y = "Risk Difference (v. Observed)", title = "") +
   geom_hline(yintercept = 0, linetype = "dashed", color = "black") +
-  scale_color_manual(values = c("#FFCC00", 
-                                "#C0392B", "#F39C12", "#7B3F3F", "#9B870C", "#E91E63")) +
-  scale_shape_manual(values = c(17, 
-                                18, 15, 20, 19, 8)) +
+  scale_color_manual(values = c("#DAA520", "#C0392B", 
+                                "#2E8B57","#000000", "#6495ED", "#FF7F00")) +
+  scale_shape_manual(values = c(17, 3, 18, 19, 15, 8)) +
   scale_x_discrete(limits = c("1", "2", "3", "4", "5")) + 
   scale_y_continuous(limits = c(-0.036, 0.0025),
                      labels = label_number(accuracy = 0.0001)) + 
@@ -440,6 +439,11 @@ primary_plot <- ggarrange(plots_d1, plots_d2, plots_d3,
   annotation_custom(
     grob = grid.lines(x = c(2/3, 2/3), y = c(0, 1), gp = gpar(col = "black", lwd = 1.5))
   )
+
+primary_plot
+
+ggsave(plot = primary_plot, filename = here::here("figures/primary_figure_final.jpg"),
+       width = 12, height = 9, dpi = 300, units = "in")
 
 ggsave(plot = primary_plot, filename = here::here("figures/primary_figure_final.pdf"),
        width = 12, height = 9, dpi = 300, units = "in")
