@@ -270,6 +270,7 @@ contrast_plot_d1 <- ggplot(data = d1_data_contrast, aes(x = factor(t), y = theta
 
 plots_d1 <- ggarrange(results_plot_d1, 
                       contrast_plot_d1,
+                      labels = c("A", "D"),
                       align = "h",
                       nrow = 2)
 
@@ -341,6 +342,7 @@ contrast_plot_d2 <- ggplot(data = d2_data_contrast, aes(x = factor(t), y = theta
 
 plots_d2 <- ggarrange(results_plot_d2, 
                       contrast_plot_d2,
+                      labels = c("B", "E"),
                       align = "h",
                       nrow = 2)
 
@@ -424,13 +426,12 @@ contrast_plot_d3 <- ggplot(data = d3_data_contrast, aes(x = factor(t), y = theta
 
 plots_d3 <- ggarrange(results_plot_d3, 
                       contrast_plot_d3,
+                      labels = c("C", "F"),
                       align = "h",
                       nrow = 2)
 
 primary_plot <- ggarrange(plots_d1, plots_d2, plots_d3,
                           align = "h",
-                          #labels = c("d1. Reducing MME by 20%                 ", "d2. Reducing Days' Supply by 20%        ", "d3. Reducing MME and Days' Supply by 20%"),
-                          label.x = -0.2,
                           font.label = list(size = 10),
                           nrow = 1) + 
   annotation_custom(
