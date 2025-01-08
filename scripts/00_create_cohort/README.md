@@ -32,12 +32,11 @@
     - ~~OTH~~
 
     - ~~DEBSE~~
-9.  Long-term care
-10. ~~Palliative care~~
+9. ~~Palliative care~~
     - ~~OTH~~
 
     - ~~IHP~~
-11. ~~Institutionalized~~
+10. ~~Institutionalized~~
     - ~~DEBSE~~
 
 ### Inclusion
@@ -72,5 +71,3 @@ Individuals are censored when:
 2)  ~~they become dual eligible~~
 
 3)  ~~on December 31, 2019~~
-
-4)  after 15 months of follow up
