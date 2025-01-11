@@ -376,8 +376,8 @@ results_plot_d3 <- base_plot +
   labs(color = "Treatment Regime (Subgroup)",
        shape = "Treatment Regime (Subgroup)") + 
   theme_minimal() + 
-  scale_color_manual(values = c("#DAA520", "#DAA520","#C0392B", 
-                                "#C0392B", "#2E8B57", "#2E8B57","#000000", "#000000", "#6495ED", "#6495ED", "#FF7F00","#FF7F00")) +
+  scale_color_manual(values = c("#DAA520", "#DAA520","#950606", 
+                                "#950606", "#2E8B57", "#2E8B57","#000000", "#000000", "#6495ED", "#6495ED", "#FF7F00","#FF7F00")) +
   scale_shape_manual(values = c(2, 17, 10, 
                                 3, 9, 18, 1, 19, 12, 15, 13, 8)) +
   scale_x_discrete(limits = c("1", "2", "3", "4", "5")) +
@@ -413,7 +413,7 @@ contrast_plot_d3 <- ggplot(data = d3_data_contrast, aes(x = factor(t), y = theta
                 position = position_dodge(width = 0.75)) +
   labs(x = "Time Period (3 month intervals)", y = "Risk Difference (v. Observed)", title = "") +
   geom_hline(yintercept = 0, linetype = "dashed", color = "black") +
-  scale_color_manual(values = c("#DAA520", "#C0392B", 
+  scale_color_manual(values = c("#DAA520", "#950606", 
                                 "#2E8B57","#000000", "#6495ED", "#FF7F00")) +
   scale_shape_manual(values = c(17, 3, 18, 19, 15, 8)) +
   scale_x_discrete(limits = c("1", "2", "3", "4", "5")) + 
@@ -442,9 +442,6 @@ primary_plot <- ggarrange(plots_d1, plots_d2, plots_d3,
   )
 
 primary_plot
-
-ggsave(plot = primary_plot, filename = here::here("figures/primary_figure_final.jpg"),
-       width = 12, height = 9, dpi = 300, units = "in")
 
 ggsave(plot = primary_plot, filename = here::here("figures/primary_figure_final.pdf"),
        width = 12, height = 9, dpi = 300, units = "in")
