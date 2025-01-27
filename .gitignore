@@ -3,5 +3,5 @@
 .RData
 .Ruserdata
 .DS_Store
-.results/
-.figures/
+results
+figures
