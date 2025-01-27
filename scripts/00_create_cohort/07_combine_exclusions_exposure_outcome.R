@@ -55,7 +55,7 @@ cohort <-
          cens_hillary_period_3 = cens_period_3,
          cens_hillary_period_4 = cens_period_4,
          cens_hillary_period_5 = cens_period_5
-         )
+  )
 
 convert_cens_to_na <- function (data, outcomes, cens) {
   DT <- as.data.table(data)
@@ -78,8 +78,8 @@ convert_outcome_to_na <- function (data, outcomes, cens) {
     DT[get(cens_j) == 0, `:=`((modify), lapply(.SD, function(x) NA_real_)), .SDcols = modify]
     
     if(j > 1){ # if previously experienced outcome but then censored at later point, considered to have had outcome at subsequent timepoints
-    outcome_j_1 <- outcomes[j-1]
-    DT[get(outcome_j_1) == 1, `:=`((modify), lapply(.SD, function(x) 1)), .SDcols = modify]
+      outcome_j_1 <- outcomes[j-1]
+      DT[get(outcome_j_1) == 1, `:=`((modify), lapply(.SD, function(x) 1)), .SDcols = modify]
     }
     
     
@@ -99,6 +99,13 @@ cohort <-
          starts_with("cens_period"), 
          starts_with("cens_hillary_period"), 
          starts_with("oud_period"),
-         starts_with("oud_hillary_period"))
+         starts_with("oud_hillary_period")) |>
+  mutate(oud_period_5 = case_when(oud_period_4 == 1 ~ 1,
+                                  cens_period_5 == 0 ~ as.numeric(NA),
+                                  TRUE ~ oud_period_5),
+         oud_hillary_period_5 = case_when(oud_hillary_period_4 == 1 ~ 1,
+                                  cens_hillary_period_5 == 0 ~ as.numeric(NA),
+                                  TRUE ~ oud_hillary_period_5)
+         )
 
 write_data(cohort, "inclusion_exclusion_cohort_with_exposure_outcomes.fst")
