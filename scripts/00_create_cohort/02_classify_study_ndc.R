@@ -23,7 +23,7 @@ ndc <- read_fst("data/public/study_period_unique_ndc.fst") |>
   as.data.table()
 
 # Convert NDC -> RxCUI -> ATC
-plan(multisession, workers = 1)
+plan(multisession, workers = 10)
 
 ndc_status <- foreach(code = ndc[, NDC]) %dofuture% {
   get_ndc_status(code, local_host = local)
