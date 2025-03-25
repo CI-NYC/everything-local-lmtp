@@ -17,7 +17,7 @@ library(dplyr)
 source("R/helpers.R")
 
 # Load washout dates
-washout <- load_data("msk_washout_dts.fst")
+washout <- load_data("msk_washout_opioid_requirements.fst")
 
 # Load temporary files for 01_01_filter_continuous_enrollment.R
 files <- 
@@ -32,6 +32,7 @@ find_enrollment_periods <- function(data) {
                       washout_start_dt = data$washout_start_dt, 
                       msk_diagnosis_dt = data$msk_diagnosis_dt,
                       exposure_end_dt = data$exposure_end_dt, 
+                      min_opioid_date = data$min_opioid_date,
                       enrollment_start_dt = data$ENRLMT_START_DT, 
                       enrollment_end_dt = data$ENRLMT_END_DT)
   } else {
@@ -69,6 +70,7 @@ find_enrollment_periods <- function(data) {
     out <- data.table(BENE_ID = data$BENE_ID[1], 
                       washout_start_dt = data$washout_start_dt[1], 
                       msk_diagnosis_dt = data$msk_diagnosis_dt[1],
+                      min_opioid_date = data$min_opioid_date[1],
                       exposure_end_dt = data$exposure_end_dt[1], 
                       enrollment_start_dt = as.Date(int_start(enrollment_period)), 
                       enrollment_end_dt = as.Date(int_end(enrollment_period)))
@@ -113,4 +115,4 @@ cohort <-
 washout <- merge(washout, cohort)
 
 # export
-write_data(washout, "msk_washout_continuous_enrollment_dts.fst")
+write_data(washout, "msk_washout_continuous_enrollment_opioid_requirements.fst")

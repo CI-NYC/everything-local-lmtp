@@ -1,6 +1,7 @@
 # -------------------------------------
 # Script: 02_cohort_mme_join.R
 # Author: Nick Williams
+# Updates: Shodai Inose (March 25 2025) -- updated opioid period and end dates
 # Purpose: Calculate MME/strength per day for opioids in exposure period
 # Notes: Modified from: 
 #   - https://github.com/CI-NYC/medicaid-treatments-oud-risk/blob/main/scripts/01_create_treatments/01_00_treatment_dose_mme.R
@@ -47,12 +48,12 @@ otl_opioids <- left_join(cohort, otl_opioids)
 
 rxl_opioids <- 
   rxl_opioids |> 
-  filter((RX_FILL_DT > msk_diagnosis_dt) & 
+  filter((RX_FILL_DT >= min_opioid_date) & 
            (RX_FILL_DT <= exposure_end_dt))
 
 otl_opioids <- 
   otl_opioids |> 
-  filter((LINE_SRVC_BGN_DT > msk_diagnosis_dt) & 
+  filter((LINE_SRVC_BGN_DT >= min_opioid_date) & 
            (LINE_SRVC_BGN_DT <= exposure_end_dt))
 
 # calculate strength per day in Milligram Morphine Equivalent (MME) units
@@ -74,7 +75,7 @@ rxl_opioids <-
 rxl_opioids <-
   rxl_opioids |>
   select(BENE_ID,
-         msk_diagnosis_dt, 
+         min_opioid_date,
          exposure_end_dt,
          opioid,
          NDC,
@@ -86,7 +87,7 @@ rxl_opioids <-
          mme_strength_per_day,
          days_supply,
          rx_start_dt = RX_FILL_DT) |>
-  mutate(rx_end_dt = rx_start_dt + days_supply) |>
+  mutate(rx_end_dt = rx_start_dt + days_supply - 1) |>
   arrange(BENE_ID, rx_start_dt, opioid)
 
 # filter to opioids for pain, calculate strength per day in Milligram Morphine Equivalent (MME) units
@@ -101,7 +102,7 @@ otl_opioids <-
 otl_opioids <-
   otl_opioids |>
   select(BENE_ID,
-         msk_diagnosis_dt, 
+         min_opioid_date, 
          exposure_end_dt,
          NDC,
          dose_form,
@@ -109,7 +110,7 @@ otl_opioids <-
          strength,
          mme_strength_per_day,
          rx_start_dt = LINE_SRVC_BGN_DT) |>
-  mutate(rx_end_dt = rx_start_dt + 1) |> # 1 day supply assumption
+  mutate(rx_end_dt = rx_start_dt) |> # 1 day supply assumption
   arrange(BENE_ID, rx_start_dt, opioid)
 
 opioids <- 
@@ -117,4 +118,4 @@ opioids <-
   unique() |> 
   mutate(days_supply = replace_na(days_supply, 1))
 
-write_data("everything-local-lmtp/exposure_period_opioids.fst")
+write_data(opioids, "exposure_period_opioids.fst")

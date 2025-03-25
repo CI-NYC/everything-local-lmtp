@@ -26,6 +26,8 @@ library(foreach)
 #plan(multicore)
 #getDoParWorkers()
 
+set.seed(9)
+
 source(here::here("R/helpers.R"))
 
 # Read in OTH and IPH as arrow datsets -----------------------------------------------------------------------

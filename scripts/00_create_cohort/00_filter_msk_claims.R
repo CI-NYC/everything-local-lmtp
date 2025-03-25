@@ -1,6 +1,7 @@
 # -------------------------------------
 # Script: 00_filter_msk_claims.R
 # Author: Nick Williams
+# Updated: Shodai (March 24 2025) -- updated possible MSK diagnosis dates to 01/01/2016 - 12/31/2019
 # Purpose: Find all msk claims within the specified date range 
 #   in the Other Services and Inpatient files
 # Notes:
@@ -21,8 +22,8 @@ iph <- open_iph()
 
 codes <- read_yaml("data/public/msk_codes.yml")$code
 
-start_dt <- as.Date("2016-07-01")
-end_dt <- as.Date("2019-10-01")
+start_dt <- as.Date("2016-01-01")
+end_dt <- as.Date("2019-12-31")
 
 keep <- c("BENE_ID", 
           "CLM_ID", 
@@ -70,27 +71,27 @@ iph_msk <- unique(iph_msk, by = c(1, 2))
 oth_msk <- oth_msk[!is.na(BENE_ID)]
 iph_msk <- iph_msk[!is.na(BENE_ID)]
 
-# Sort by date and take first claim for each BENE_ID to calculate washout start date
+# Sort by date and take first claim for each BENE_ID to calculate the earliest possible washout start date
 setorder(oth_msk, BENE_ID, SRVC_BGN_DT)
-oth_msk[, let(washout_start_dt = min(SRVC_BGN_DT)), BENE_ID]
-oth_msk <- oth_msk[SRVC_BGN_DT == washout_start_dt]
-oth_msk[, let(washout_start_dt = washout_start_dt - days(182))]
+oth_msk[, let(washout_start_dt_possible_earliest = min(SRVC_BGN_DT)), BENE_ID]
+oth_msk <- oth_msk[SRVC_BGN_DT == washout_start_dt_possible_earliest]
+oth_msk[, let(washout_start_dt_possible_earliest = washout_start_dt_possible_earliest - days(182))]
 
 setorder(iph_msk, BENE_ID, SRVC_BGN_DT)
-iph_msk[, let(washout_start_dt = min(SRVC_BGN_DT)), BENE_ID]
-iph_msk <- iph_msk[SRVC_BGN_DT == washout_start_dt]
-iph_msk[, let(washout_start_dt = washout_start_dt - days(182))]
+iph_msk[, let(washout_start_dt_possible_earliest = min(SRVC_BGN_DT)), BENE_ID]
+iph_msk <- iph_msk[SRVC_BGN_DT == washout_start_dt_possible_earliest]
+iph_msk[, let(washout_start_dt_possible_earliest = washout_start_dt_possible_earliest - days(182))]
 
-oth_msk <- unique(oth_msk[, .(BENE_ID, washout_start_dt, SRVC_BGN_DT)], by = 1)
-iph_msk <- unique(iph_msk[, .(BENE_ID, washout_start_dt, SRVC_BGN_DT)], by = 1)
+oth_msk <- unique(oth_msk[, .(BENE_ID, washout_start_dt_possible_earliest, SRVC_BGN_DT)], by = 1)
+iph_msk <- unique(iph_msk[, .(BENE_ID, washout_start_dt_possible_earliest, SRVC_BGN_DT)], by = 1)
 
 msk <- rbindlist(list(oth_msk, iph_msk))
-msk[, let(washout_start_dt_comb = min(washout_start_dt)), BENE_ID]
-msk <- msk[washout_start_dt == washout_start_dt_comb, .(BENE_ID, washout_start_dt, SRVC_BGN_DT)]
+msk[, let(washout_start_dt_possible_earliest_comb = min(washout_start_dt_possible_earliest)), BENE_ID]
+msk <- msk[washout_start_dt_possible_earliest == washout_start_dt_possible_earliest_comb, .(BENE_ID, washout_start_dt_possible_earliest, SRVC_BGN_DT)]
 
 setnames(msk, "SRVC_BGN_DT", "msk_diagnosis_dt")
 
-write_data(distinct(msk), "msk_washout_dts.fst")
+write_data(as.data.table(distinct(msk)), "msk_washout_dts.fst")
 
 # number of people with MSK pain claims
-msk |> nrow()
+msk |> nrow() #4,227,282

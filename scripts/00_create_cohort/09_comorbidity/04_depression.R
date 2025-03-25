@@ -18,6 +18,8 @@ library(lubridate)
 library(data.table)
 library(tictoc)
 
+set.seed(9)
+
 source(here::here("R/helpers.R"))
 
 # Readin OTH and IPH as arrow datsets -----------------------------------------------------------------------

@@ -11,6 +11,7 @@ library(collapse)
 
 source("R/helpers.R")
 
+set.seed(9)
 # load demographics dataset
 demo <- open_demo()
 

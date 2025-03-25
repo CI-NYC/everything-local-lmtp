@@ -26,7 +26,8 @@ df <- fst::read_fst(paste0(drv_root ,"msk_cohort_clean_imputed.fst")) |>
          subset_B8 = ifelse(exposure_days_supply > 30 & exposure_max_daily_dose_mme >= 90, TRUE, FALSE),
          subset_B_not_risky_days = ifelse(exposure_days_supply <= 7, TRUE, FALSE),
          subset_B_under_20 = ifelse(exposure_max_daily_dose_mme <= 20, TRUE, FALSE),
-         subset_B_days_7_dose_under_20 = ifelse(exposure_days_supply <= 7 & exposure_max_daily_dose_mme <= 20, TRUE, FALSE))
+         subset_B_days_7_dose_under_20 = ifelse(exposure_days_supply <= 7 & exposure_max_daily_dose_mme <= 20, TRUE, FALSE)) |>
+  filter(dem_age < 64)
 
 W <- c(
   "dem_age",
@@ -61,7 +62,9 @@ W <- c(
   "missing_dem_household_size",
   "missing_dem_veteran",
   "missing_dem_tanf_benefits",
-  "missing_dem_ssi_benefits"
+  "missing_dem_ssi_benefits",
+  # 2+ ED visits in 1 month period prior to last opioid date in exposure
+  "has_2plus_ED_visit_exposure"
 ) 
 
 run_lmtp <- function(data, t, shift, conditional)
@@ -182,24 +185,24 @@ run_lmtp <- function(data, t, shift, conditional)
 set.seed(5)
 for(t in 1:5)
 {
-  for(shift in c("obs",
-                "d1",
-                 "d2",
-                 "d3",
+  for(shift in c(#"obs"#,
+                #"d1"#,
+                 "d2"#,
+                 #"d3",
   ))
   { 
-    for(subset in c("subset_B1",
-      "subset_B2",
-      "subset_B3",
-      "subset_B4",
-      "subset_B5",
-      "subset_B6",
-      "subset_B7",
-      "subset_B8",
-      "cohort",
-      "subset_B_not_risky_days",
-      "subset_B_under_20",
-      "subset_B_days_7_dose_under_20"
+    for(subset in c(#"subset_B1"#,
+      #"subset_B2"#,
+      #"subset_B3"#,
+      #"subset_B4"#,
+      #"subset_B5"#,
+      #"subset_B6"#,
+      #"subset_B7"#,
+      #"subset_B8"#,
+      #"cohort"#,
+      #"subset_B_not_risky_days"#,
+      "subset_B_under_20"#,
+      #"subset_B_days_7_dose_under_20"
     ))
     {
       finished <- FALSE
@@ -212,7 +215,7 @@ for(t in 1:5)
           
           finished <- TRUE # if success, mark as finished to exit loop
           
-          saveRDS(results, paste0("/mnt/general-data/disability/everything-local-lmtp/results_final/", shift, "_", subset, "_time_", t, ".rds"))
+          saveRDS(results, paste0("/mnt/general-data/disability/everything-local-lmtp/results_final_r1/", shift, "_", subset, "_time_", t, ".rds"))
         }, error = function(e){
           cat("Error on time ", t, ", shift: ", shift, ", subset: ", subset,
               e$message)})
