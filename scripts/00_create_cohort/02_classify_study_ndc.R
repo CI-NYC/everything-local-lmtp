@@ -1,7 +1,7 @@
 # -------------------------------------
 # Script: 03_classify_study_ndc.R
 # Author: Nick Williams
-# Updated:
+# Updated: 
 # Purpose: Classify unique NDC using ATC
 # Notes: Modified from https://github.com/CI-NYC/rxnorm-paper/blob/main/scripts/00_pipeline.R
 # -------------------------------------
@@ -19,10 +19,11 @@ library(fst)
 local <- TRUE
 
 # Load list of NDCs
-ndc <- read_fst("data/public/study_period_unique_ndc.fst")
+ndc <- read_fst("data/public/study_period_unique_ndc.fst") |>
+  as.data.table()
 
 # Convert NDC -> RxCUI -> ATC
-plan(multisession, workers = 10)
+plan(multisession, workers = 1)
 
 ndc_status <- foreach(code = ndc[, NDC]) %dofuture% {
   get_ndc_status(code, local_host = local)

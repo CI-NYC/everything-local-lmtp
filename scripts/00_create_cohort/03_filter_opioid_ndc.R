@@ -19,9 +19,9 @@ codes <- read_yaml("data/public/drug_codes.yml")
 
 # load initial continuous enrollment cohort
 cohort <- load_data("msk_washout_continuous_enrollment_dts.fst")
-#cohort[, let(exposure_end_dt = msk_diagnosis_dt + days(91))]
+#cohort[, let(exposure_end_dt_latest_possible = msk_diagnosis_dt + days(91))]
 cohort <- cohort |>
-  mutate(exposure_end_dt = msk_diagnosis_dt + days(91))
+  mutate(exposure_end_dt_latest_possible = msk_diagnosis_dt + days(91))
 
 # find opioid ndcs --------------------------------------------------------
 
@@ -96,7 +96,7 @@ otl <-
     LINE_SRVC_BGN_DT
   )) |> 
   filter((LINE_SRVC_BGN_DT > msk_diagnosis_dt) & 
-           (LINE_SRVC_BGN_DT <= exposure_end_dt), 
+           (LINE_SRVC_BGN_DT <= exposure_end_dt_latest_possible), 
          NDC %in% ndc_opioids$NDC) |> 
   select(BENE_ID) |> 
   distinct()
@@ -108,7 +108,7 @@ rxl <-
   select(rxl, BENE_ID, CLM_ID, RX_FILL_DT, NDC) |> 
   inner_join(cohort, by = "BENE_ID") |> 
   filter((RX_FILL_DT > msk_diagnosis_dt) & 
-           (RX_FILL_DT <= exposure_end_dt), 
+           (RX_FILL_DT <= exposure_end_dt_latest_possible), 
          NDC %in% ndc_opioids$NDC) |> 
   select(BENE_ID) |> 
   distinct()

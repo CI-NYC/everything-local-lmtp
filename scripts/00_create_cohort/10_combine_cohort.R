@@ -15,16 +15,20 @@ bipolar <- readRDS("/mnt/general-data/disability/everything-local-lmtp/comorbidi
 depression <- readRDS("/mnt/general-data/disability/everything-local-lmtp/comorbidity/depression.rds")
 mental_ill <- readRDS("/mnt/general-data/disability/everything-local-lmtp/comorbidity/mental_ill.rds")
 
+ED_visits <- readRDS(file.path("/mnt/general-data/disability/everything-local-lmtp", "confounder_num_ED_visit.rds"))
+
 cohort_MH_joined <- cohort |>
   left_join(adhd |> select(BENE_ID, adhd_washout_6mos_cal) |> rename("adhd_washout_cal" = "adhd_washout_6mos_cal")) |>
   left_join(anxiety |> select(BENE_ID, anxiety_washout_6mos_cal) |> rename("anxiety_washout_cal" = "anxiety_washout_6mos_cal")) |>
   left_join(bipolar |> select(BENE_ID, bipolar_washout_6mos_cal) |> rename("bipolar_washout_cal" = "bipolar_washout_6mos_cal")) |>
   left_join(depression |> select(BENE_ID, depression_washout_6mos_cal) |> rename("depression_washout_cal" = "depression_washout_6mos_cal")) |>
   left_join(mental_ill |> select(BENE_ID, mental_ill_washout_6mos_cal) |> rename("mental_ill_washout_cal" = "mental_ill_washout_6mos_cal")) |>
+  left_join(ED_visits |> select(BENE_ID, has_2plus_ED_visit_exposure)) |>
   select(BENE_ID, 
          ends_with("dt", ignore.case = FALSE), 
          starts_with("dem"),
          ends_with("_washout_cal"),
+         "has_2plus_ED_visit_exposure",
          starts_with("exposure"), 
          starts_with("subset"), 
          cens_period_1, oud_period_1, 
