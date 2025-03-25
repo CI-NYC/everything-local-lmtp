@@ -14,7 +14,7 @@ library(furrr)
 
 opioids <- readRDS("data/public/ndc_to_atc_opioids.rds")
 
-plan(multisession)
+plan(multisession, workers = 10)
 
 strength <- foreach(code = opioids[, rxcui]) %dofuture% {
   get_rxcui_strength(code, local_host = TRUE)
