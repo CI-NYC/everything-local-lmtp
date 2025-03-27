@@ -105,3 +105,5 @@ opioid_flag <- foreach(code = ndc[, atc], .combine = "c") %dofuture% {
 ndc_opioids <- ndc[opioid_flag]
 
 saveRDS(ndc_opioids, "data/public/ndc_to_atc_opioids.rds")
+
+plan(sequential)
