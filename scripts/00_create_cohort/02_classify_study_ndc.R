@@ -92,14 +92,13 @@ unclassified[, rxname := rxname]
 
 saveRDS(ndc, "data/public/ndc_to_atc_crosswalk.rds")
 
-codes <- read_yaml("data/public/drug_codes.yml")
-
+codes <- yaml::read_yaml("data/public/drug_codes.yml")
 
 # find opioid ndcs --------------------------------------------------------
 
 opioids <- names(codes[["Opioid pain"]]$ATC)
 
-opioid_flag <- foreach(code = ndc[, atc], .combine = "c") %do% {
+opioid_flag <- foreach(code = ndc[, atc], .combine = "c") %dofuture% {
   any(sapply(opioids, \(x) str_detect(code, x)), na.rm = TRUE)
 }
 
