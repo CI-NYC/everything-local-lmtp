@@ -18,16 +18,7 @@ library(ranger)
 drv_root <- "/mnt/general-data/disability/everything-local-lmtp/"
 
 df <- fst::read_fst(paste0(drv_root ,"msk_cohort_clean_imputed.fst")) |>
-  as.data.table() |>
-  mutate(subset_B4 = ifelse(exposure_max_daily_dose_mme >= 90, TRUE, FALSE),
-         subset_B5 = ifelse(exposure_max_daily_dose_mme >= 90 & exposure_days_supply > 7, TRUE, FALSE),
-         subset_B6 = ifelse(exposure_days_supply > 30, TRUE, FALSE),
-         subset_B7 = ifelse(exposure_days_supply > 30 & exposure_max_daily_dose_mme >= 50, TRUE, FALSE),
-         subset_B8 = ifelse(exposure_days_supply > 30 & exposure_max_daily_dose_mme >= 90, TRUE, FALSE),
-         subset_B_not_risky_days = ifelse(exposure_days_supply <= 7, TRUE, FALSE),
-         subset_B_under_20 = ifelse(exposure_max_daily_dose_mme <= 20, TRUE, FALSE),
-         subset_B_days_7_dose_under_20 = ifelse(exposure_days_supply <= 7 & exposure_max_daily_dose_mme <= 20, TRUE, FALSE)) |>
-  filter(dem_age < 64)
+  as.data.table()
 
 W <- c(
   "dem_age",

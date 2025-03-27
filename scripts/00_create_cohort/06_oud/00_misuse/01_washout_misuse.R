@@ -17,7 +17,7 @@ cohort <- load_data("msk_washout_continuous_enrollment_opioid_requirements.fst")
 opioids <- load_data("msk_washout_continuous_enrollment_opioid_requirements_pain_opioids_dts.fst")
 
 washout_oud_misuse <- 
-  fsubset(opioids, RX_FILL_DT %within% interval(washout_start_dt, msk_diagnosis_dt)) |> 
+  fsubset(opioids, RX_FILL_DT %within% interval(washout_start_dt, washout_end_dt)) |> 
   fgroup_by(BENE_ID) |> 
   fsummarise(distinct_providers = n_distinct(PRSCRBNG_PRVDR_NPI), 
              distinct_dispensers = n_distinct(DSPNSNG_PRVDR_NPI),

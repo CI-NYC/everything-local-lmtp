@@ -33,7 +33,7 @@ source(here::here("R/helpers.R"))
 # Read in OTH and IPH as arrow datsets -----------------------------------------------------------------------
 
 src_root <- "/mnt/processed-data/disability"
-files <- paste0(list.files(src_root, pattern = "*TAFOTL*", recursive = TRUE))
+files <- paste0(list.files(src_root, pattern = "*TAFOTH*", recursive = TRUE))
 parquet_files <- grep("\\.parquet$", files, value = TRUE)
 oth <- open_dataset(file.path(src_root, parquet_files))
 
@@ -42,8 +42,7 @@ parquet_files <- grep("\\.parquet$", files, value = TRUE)
 iph <- open_dataset(file.path(src_root, parquet_files))
 
 # read in cohort dates file
-dts_cohorts <- load_data("msk_cohort.fst") |>
-  mutate(washout_end_dt_6mo = washout_start_dt + days(182))
+dts_cohorts <- load_data("msk_cohort.fst")
 
 # read in all icd adhd codes
 adhd_icds <- read_csv("~/disability/projects/create_cohort/input/ICD_codes/adhd_icd10_20230323.csv", col_names = F) |>
@@ -115,7 +114,7 @@ all_dg_clean_function  <- function(data, x)
   data |>
     left_join(dts_cohorts |> select(BENE_ID, washout_start_dt)) |>
     group_by(BENE_ID) |>
-    filter(SRVC_BGN_DT <= washout_start_dt + num_days_end + days(182),
+    filter(SRVC_BGN_DT <= washout_end_dt + num_days_end,
            SRVC_END_DT >= washout_start_dt + num_days_start) |>
     mutate(SRVC_BGN_DT = ifelse(SRVC_BGN_DT < washout_start_dt + num_days_start, washout_start_dt + num_days_start, as.Date(SRVC_BGN_DT))) |>
     mutate(SRVC_BGN_DT = as.Date(SRVC_BGN_DT)) |>
@@ -166,9 +165,9 @@ iph_dg_clean_function  <- function(data, x)
   data |>
     mutate(adhd = +(if_any(starts_with("DGNS_CD"),  ~. %in% adhd_icds$ICD9_OR_10))) |>
     filter(adhd == T) |> # only keep adhd codes
-    left_join(dts_cohorts |> select(BENE_ID, washout_start_dt)) |> # join washout start date in
+    left_join(dts_cohorts |> select(BENE_ID, washout_start_dt, washout_end_dt)) |> # join washout start date in
     group_by(BENE_ID) |>
-    filter(SRVC_BGN_DT <= washout_start_dt + num_days_end + days(182),
+    filter(SRVC_BGN_DT <= washout_end_dt + num_days_end,
            SRVC_END_DT >= washout_start_dt + num_days_start) |>
     mutate(SRVC_BGN_DT = ifelse(SRVC_BGN_DT < washout_start_dt + num_days_start, washout_start_dt + num_days_start, as.Date(SRVC_BGN_DT))) |>
     mutate(SRVC_BGN_DT = as.Date(SRVC_BGN_DT)) |>
@@ -226,7 +225,7 @@ all_adhd <-
 all_adhd_clean <- 
   dts_cohorts |>
   left_join(all_adhd) |>
-  mutate(adhd_washout_6mos_cal = case_when(min_adhd_dt_0 %within% interval(washout_start_dt, washout_end_dt_6mo) ~ 1,
+  mutate(adhd_washout_6mos_cal = case_when(min_adhd_dt_0 %within% interval(washout_start_dt, washout_end_dt) ~ 1,
                                            TRUE ~ 0)) |>
   select(BENE_ID, min_adhd_dt_0,
          adhd_washout_6mos_cal)

@@ -22,7 +22,7 @@ codes <- read_yaml("data/public/eligibility_codes.yml")
 cohort <- fmutate(
   cohort, 
   period_1 = interval(
-    exposure_end_dt, exposure_end_dt + days(91)
+    exposure_end_dt + days(1), exposure_end_dt + days(91)
   ), 
   period_2 = interval(
     int_end(period_1) + days(1), int_end(period_1) + days(91)
@@ -120,7 +120,7 @@ dual_codes2 <-
           year = as.numeric(RFRNC_YR),
           elig_dt = as.Date(paste0(year, "-", month, "-01"))) |> 
   join(cohort, how = "inner") |> 
-  fselect(BENE_ID, washout_start_dt, msk_diagnosis_dt, code, elig_dt) |> 
+  fselect(BENE_ID, washout_start_dt, min_opioid_dt, code, elig_dt) |> 
   fsubset(code %in% codes$dual_eligibility)
 
 dual_cens2 <- 

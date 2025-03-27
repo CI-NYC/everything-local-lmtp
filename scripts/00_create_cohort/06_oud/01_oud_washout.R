@@ -42,7 +42,7 @@ cohort <-
 cohort <- 
   fmutate(hillary, 
         exclusion_oud_hillary = 
-          as.numeric(oud_hillary_dt %within% interval(washout_start_dt, msk_diagnosis_dt))) |> 
+          as.numeric(oud_hillary_dt %within% interval(washout_start_dt, washout_end_dt))) |> 
   fselect(BENE_ID, exclusion_oud_hillary) |> 
   funique() |> 
   join(cohort, how = "right") |> 
@@ -52,7 +52,7 @@ cohort <-
 cohort <- 
   fmutate(poison, 
           exclusion_oud_poison = 
-            as.numeric(oud_poison_dt %within% interval(washout_start_dt, msk_diagnosis_dt))) |> 
+            as.numeric(oud_poison_dt %within% interval(washout_start_dt, washout_end_dt))) |> 
   fselect(BENE_ID, exclusion_oud_poison) |> 
   funique() |> 
   join(cohort, how = "right") |> 

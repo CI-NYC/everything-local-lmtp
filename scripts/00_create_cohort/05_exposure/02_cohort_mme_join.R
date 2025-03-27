@@ -49,12 +49,12 @@ otl_opioids <- left_join(cohort, otl_opioids)
 rxl_opioids <- 
   rxl_opioids |> 
   filter((RX_FILL_DT >= min_opioid_date) & 
-           (RX_FILL_DT <= exposure_end_dt))
+           (RX_FILL_DT <= exposure_end_dt_possible_latest))
 
 otl_opioids <- 
   otl_opioids |> 
   filter((LINE_SRVC_BGN_DT >= min_opioid_date) & 
-           (LINE_SRVC_BGN_DT <= exposure_end_dt))
+           (LINE_SRVC_BGN_DT <= exposure_end_dt_possible_latest))
 
 # calculate strength per day in Milligram Morphine Equivalent (MME) units
 # no caps on number of pills, days supply, and pills per day
@@ -76,7 +76,7 @@ rxl_opioids <-
   rxl_opioids |>
   select(BENE_ID,
          min_opioid_date,
-         exposure_end_dt,
+         exposure_end_dt_possible_latest,
          opioid,
          NDC,
          dose_form,
@@ -103,7 +103,7 @@ otl_opioids <-
   otl_opioids |>
   select(BENE_ID,
          min_opioid_date, 
-         exposure_end_dt,
+         exposure_end_dt_possible_latest,
          NDC,
          dose_form,
          opioid,

@@ -1,6 +1,7 @@
 # -------------------------------------
 # Script: 06_tafdebse_exclusions.R
 # Author: Nick Williams
+# Updated: Shodai Inose (Mach 25 2025) change washout end date
 # Purpose:
 # Notes: Modified from https://github.com/CI-NYC/disability-chronic-pain/blob/main/scripts/02_clean_tafdebse.R
 # -------------------------------------
@@ -49,7 +50,7 @@ exclusion_age <-
   drop_na() |> 
   fmutate(age_enrollment = floor(time_length(interval(BIRTH_DT, washout_start_dt), "years")), 
           exclusion_age = fcase(age_enrollment < 19, 1, 
-                                age_enrollment >= 65, 1, 
+                                age_enrollment >= 64, 1, 
                                 default = 0)) |> 
   group_by(BENE_ID) |> 
   add_tally() |> 
@@ -82,10 +83,10 @@ eligibility_codes <-
           year = as.numeric(RFRNC_YR),
           elig_dt = as.Date(paste0(year, "-", month, "-01"))) |> 
   join(cohort, how = "inner") |> 
-  fselect(BENE_ID, washout_start_dt, msk_diagnosis_dt, code, elig_dt)
+  fselect(BENE_ID, washout_start_dt, washout_end_dt, code, elig_dt)
 
 eligibility_codes <- 
-  fsubset(eligibility_codes, elig_dt %within% interval(washout_start_dt, msk_diagnosis_dt))
+  fsubset(eligibility_codes, elig_dt %within% interval(washout_start_dt, washout_end_dt))
 
 # Filter to last eligiblity code in washout time period
 wo_eligibility_codes <- 
@@ -131,7 +132,7 @@ dual_codes <-
 
 exclusion_dual_eligible <- 
   join(cohort, dual_codes, how = "inner") |> 
-  fmutate(exclusion_dual_eligible = elig_dt %within% interval(washout_start_dt, msk_diagnosis_dt)) |> 
+  fmutate(exclusion_dual_eligible = elig_dt %within% interval(washout_start_dt, washout_end_dt)) |> 
   fsubset(exclusion_dual_eligible) |> 
   fselect(BENE_ID, exclusion_dual_eligible) |> 
   funique() |> 

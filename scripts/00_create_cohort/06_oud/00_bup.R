@@ -3,7 +3,7 @@
 # Author: Nick Williams
 # Purpose: Identify MOUD buprenorphine periods
 # Notes:
-#   - 3 week (21 day) grace period is used
+#   - 3 week (21 day) grace period is used (20 when including start date)
 # -------------------------------------
 
 library(arrow)
@@ -84,7 +84,7 @@ otl_ndc_bup <-
       # - buprenorphine injections have a 30 days supply
       fsubset(otl_ndc_bup, form == "injection") |> 
         fselect(BENE_ID, moud_start_dt = LINE_SRVC_BGN_DT) |> 
-        fmutate(moud_end_dt = moud_start_dt + 51), 
+        fmutate(moud_end_dt = moud_start_dt + 29 + 21), 
       # - BUP-NX, assuming 1 day supply
       fsubset(otl_ndc_bup, form %in% c("tablet","film") & check == 0) |>
         fselect(BENE_ID, moud_start_dt = LINE_SRVC_BGN_DT) |> 
@@ -129,9 +129,9 @@ otl_hcpcs_bup <-
   ) |> 
   fselect(BENE_ID, moud_start_dt = LINE_SRVC_BGN_DT, form) |> 
   fmutate(moud_end_dt = fcase(
-    form == "implant", moud_start_dt + 21 + 182,
-    form == "injection", moud_start_dt + 21 + 30,
-    form == "tablet", moud_start_dt + 21 
+    form == "implant", moud_start_dt + 21 + 181,
+    form == "injection", moud_start_dt + 21 + 29,
+    form == "tablet", moud_start_dt + 21
   )) |> 
   fselect(-form) |> 
   funique()
@@ -156,7 +156,7 @@ moud_bup <-
   join(cohort, how = "left") |> 
   fmutate(moud_bup_washout = int_overlaps(
     interval(moud_start_dt, moud_end_dt),
-    interval(washout_start_dt, msk_diagnosis_dt)
+    interval(washout_start_dt, washout_end_dt)
   )) |> 
   fgroup_by(BENE_ID) |> 
   fsummarise(moud_bup_washout = as.numeric(sum(moud_bup_washout) > 0))

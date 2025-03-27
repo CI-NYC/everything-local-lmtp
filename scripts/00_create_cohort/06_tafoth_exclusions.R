@@ -1,7 +1,7 @@
 # -------------------------------------
 # Script: 06_tafoth_exclusions.R
 # Author: Nick Williams
-# Updated:
+# Updated: Shodai Inose (Mach 25 2025) change washout end date
 # Purpose: 
 # Notes: Modified from https://github.com/CI-NYC/disability-chronic-pain/blob/93bbeb9d2edff361bf622a9889c7e1d811f0f238/scripts/03_initial_cohort_exclusions/clean_tafoth.R
 # -------------------------------------
@@ -26,13 +26,13 @@ oth <- open_oth()
 oth <- 
   select(oth, BENE_ID, SRVC_BGN_DT, SRVC_END_DT, contains("DGNS_CD")) |> 
   inner_join(
-    select(cohort, BENE_ID, washout_start_dt, msk_diagnosis_dt), 
+    select(cohort, BENE_ID, washout_start_dt, washout_end_dt), 
     by = "BENE_ID"
   ) |> 
   collect() |> 
   fsubset(!(is.na(DGNS_CD_1) & is.na(DGNS_CD_2))) |> 
   fmutate(SRVC_BGN_DT = fifelse(is.na(SRVC_BGN_DT), SRVC_END_DT, SRVC_BGN_DT)) |>
-  fsubset(SRVC_BGN_DT %within% interval(washout_start_dt, msk_diagnosis_dt))
+  fsubset(SRVC_BGN_DT %within% interval(washout_start_dt, washout_end_dt))
 
 # Identify whether exclusion ICD code of interest occurs in washout ICDs
 oth_exclusions <-

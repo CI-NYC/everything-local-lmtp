@@ -17,6 +17,14 @@ exposures <-
   join(mme, days_supply, how = "full") |> 
   fmutate(subset_B1 = exposure_max_daily_dose_mme >= 50, 
           subset_B2 = exposure_days_supply > 7, 
-          subset_B3 = subset_B1 & subset_B2)
+          subset_B3 = subset_B1 & subset_B2,
+          subset_B4 = ifelse(exposure_max_daily_dose_mme >= 90, TRUE, FALSE),
+          subset_B5 = ifelse(exposure_max_daily_dose_mme >= 90 & exposure_days_supply > 7, TRUE, FALSE),
+          subset_B6 = ifelse(exposure_days_supply > 30, TRUE, FALSE),
+          subset_B7 = ifelse(exposure_days_supply > 30 & exposure_max_daily_dose_mme >= 50, TRUE, FALSE),
+          subset_B8 = ifelse(exposure_days_supply > 30 & exposure_max_daily_dose_mme >= 90, TRUE, FALSE),
+          subset_B_not_risky_days = ifelse(exposure_days_supply <= 7, TRUE, FALSE),
+          subset_B_under_20 = ifelse(exposure_max_daily_dose_mme <= 20, TRUE, FALSE),
+          subset_B_days_7_dose_under_20 = ifelse(exposure_days_supply <= 7 & exposure_max_daily_dose_mme <= 20, TRUE, FALSE))
 
 write_data(exposures, "exposures_with_subsets.fst")

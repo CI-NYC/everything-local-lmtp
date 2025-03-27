@@ -60,7 +60,7 @@ moud_methadone <-
   join(cohort, how = "left") |> 
   fmutate(moud_methadone_washout = int_overlaps(
     interval(moud_start_dt, moud_end_dt),
-    interval(washout_start_dt, msk_diagnosis_dt)
+    interval(washout_start_dt, washout_end_dt)
   )) |> 
   fgroup_by(BENE_ID) |> 
   fsummarise(moud_methadone_washout = as.numeric(sum(moud_methadone_washout) > 0))

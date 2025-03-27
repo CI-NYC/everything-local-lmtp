@@ -137,7 +137,7 @@ removed |>
 cohort_with_opioids <- cohort_with_opioids |>
   mutate(washout_start_dt = min_opioid_date - days(182),
          washout_end_dt = min_opioid_date - days(1),
-         exposure_end_dt = min_opioid_date + days(90)) |>
-  select(BENE_ID, washout_start_dt, msk_diagnosis_dt, washout_end_dt, min_opioid_date, exposure_end_dt)
+         exposure_end_dt_possible_latest = min_opioid_date + days(90)) |>
+  select(BENE_ID, washout_start_dt, msk_diagnosis_dt, washout_end_dt, min_opioid_date, exposure_end_dt_possible_latest)
 
 write_data(cohort_with_opioids, "msk_washout_opioid_requirements.fst")

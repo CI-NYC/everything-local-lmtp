@@ -16,7 +16,7 @@ library(glue)
 library(doFuture)
 library(fst)
 
-local <- TRUE
+local <- FALSE
 
 # Load list of NDCs
 ndc <- read_fst("data/public/study_period_unique_ndc.fst") |>
@@ -91,18 +91,3 @@ rxname <- foreach(code = unclassified[, rxcui]) %dofuture% {
 unclassified[, rxname := rxname]
 
 saveRDS(ndc, "data/public/ndc_to_atc_crosswalk.rds")
-
-codes <- read_yaml("data/public/drug_codes.yml")
-
-
-# find opioid ndcs --------------------------------------------------------
-
-opioids <- names(codes[["Opioid pain"]]$ATC)
-
-opioid_flag <- foreach(code = ndc[, atc], .combine = "c") %do% {
-  any(sapply(opioids, \(x) str_detect(code, x)), na.rm = TRUE)
-}
-
-ndc_opioids <- ndc[opioid_flag]
-
-saveRDS(ndc_opioids, "data/public/ndc_to_atc_opioids.rds")

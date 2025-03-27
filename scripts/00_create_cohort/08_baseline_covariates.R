@@ -22,7 +22,9 @@ probable_income <- load_data("probable_high_income_cal.fst")
 
 demo <- 
   filter(demo, BENE_ID %in% cohort$BENE_ID) |> 
+  left_join(cohort |> select(BENE_ID, washout_start_dt)) |>
   collect() |> 
+  filter(year(washout_start_dt) == as.numeric(RFRNC_YR)) |> # demographic information from year of washout -- NOTE: check that everyone is still in cohort
   select(BENE_ID,
          RFRNC_YR,
          BIRTH_DT,

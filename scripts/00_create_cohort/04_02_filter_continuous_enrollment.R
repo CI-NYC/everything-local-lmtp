@@ -76,7 +76,7 @@ find_enrollment_periods <- function(data) {
                       enrollment_end_dt = as.Date(int_end(enrollment_period)))
   }
 
-  out[(washout_start_dt >= enrollment_start_dt)] # must be enrolled for 6 month washout
+  out[(washout_start_dt >= enrollment_start_dt) & (washout_end_dt < enrollment_end_dt)] # must be enrolled for 6 month washout
 }
 
 # # Test case

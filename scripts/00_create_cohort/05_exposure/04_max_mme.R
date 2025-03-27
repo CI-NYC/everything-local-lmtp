@@ -17,7 +17,20 @@ source("R/helpers.R")
 
 # load cohort and opioid data
 cohort <- load_data("msk_washout_continuous_enrollment_opioid_requirements.fst")
-opioids <- load_data("exposure_period_opioids.fst")
+
+days_supply <- load_data("exposure_days_supply.fst") # get exposure end dates
+
+cohort <- cohort |>
+  left_join(days_supply) |>
+  select(BENE_ID, exposure_end_dt)
+
+opioids <- load_data("exposure_period_opioids.fst") |>
+  left_join(cohort)|>
+  filter(rx_start_dt <= exposure_end_dt) |> # only keeping start date before exposure end period
+  mutate(rx_end_dt = ifelse(exposure_end_dt < rx_end_dt, exposure_end_dt, rx_end_dt)) # if rx_end_dt is after exposure end date, then use exposure_end_dt as final date
+
+# rewrite over exposure period data
+write_data(opioids, "exposure_days_supply.fst")
 
 setDT(opioids)
 setkey(opioids, BENE_ID)

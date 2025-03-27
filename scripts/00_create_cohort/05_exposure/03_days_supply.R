@@ -31,8 +31,11 @@ opioids <- opioids[, .(BENE_ID, min_opioid_date, exposure_end_dt,
 
 opioids <- opioids[, list(data = list(data.table(.SD))), by = BENE_ID]
 
+opioids <- opioids |>
+  filter(BENE_ID == "HHHHHH447777ddB")
+
 get_duration <- function(data, gap = 30) {
-  #data <- opioids$data[[158]] |> as.data.table() for testing
+  #data <- opioids$data[[158]] |> as.data.table() #for testing
   # gap <- 30
   to_modify <- copy(data) |>
     as.data.table()
@@ -64,24 +67,21 @@ get_duration <- function(data, gap = 30) {
   # find FIRST instance of 30+ day gap -- this is the last day of exposure
   all_dates_exposure_period[, indicator_30_plus_day_gap := as.integer(.I == min(.I[num_days_in_gap > gap])), by = opioid_days]
   
-  all_dates_exposure_period[indicator_30_plus_day_gap == 1]$opioid_days
+  # if all instances of indicator_30_plus_day_gap are 0, then the last row is returned
+  if (all(all_dates_exposure_period[, indicator_30_plus_day_gap] == 0)) {
+    all_dates_exposure_period[.N, indicator_30_plus_day_gap := 1]
+  }
   
+  # changing column names
+  setnames(all_dates_exposure_period, old = c("date", "opioid_days"), new = c("exposure_end_dt", "exposure_days_supply"))
+  
+  # return last exposure date + number of days supplied
+  all_dates_exposure_period <- all_dates_exposure_period[indicator_30_plus_day_gap == 1]
+  
+  # keeping only exposure end date and days' supply
+  all_dates_exposure_period <- all_dates_exposure_period[, .(exposure_end_dt, exposure_days_supply)]
+  all_dates_exposure_period
 }
-
-plan(multisession, workers = 1)
-
-# Apply function
-out <- foreach(data = opioids$data, 
-               id = opioids$BENE_ID, 
-               .combine = "rbind",
-               .options.future = list(chunk.size = 1e4)) %dofuture% {
-                 out <- get_duration(data, gap = 30)
-                 out$BENE_ID <- id
-                 setcolorder(out, "BENE_ID")
-                 out
-               }
-
-plan(sequential)
 
 # TEST function
 # testthat::test_that(
@@ -115,6 +115,21 @@ plan(sequential)
 #       days_supply()
 #   }, 30)
 # )
+
+plan(multisession, workers = 1)
+
+# Apply function
+out <- foreach(data = opioids$data, 
+               id = opioids$BENE_ID, 
+               .combine = "rbind",
+               .options.future = list(chunk.size = 1e4)) %dofuture% {
+                 out <- get_duration(data, gap = 30)
+                 out$BENE_ID <- id
+                 setcolorder(out, "BENE_ID")
+                 out
+               }
+
+plan(sequential)
 
 write_data(out, "exposure_days_supply.fst")
 

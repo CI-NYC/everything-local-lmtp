@@ -1,7 +1,7 @@
 # -------------------------------------
 # Script: 06_tafiph_exclusions.R
 # Author: Nick Williams
-# Updated:
+# Updated: Shodai Inose (Mach 25 2025) change washout end date
 # Purpose: Create exclusions based on TAFIPH files
 # Notes: Modified from https://github.com/CI-NYC/disability-chronic-pain/blob/93bbeb9d2edff361bf622a9889c7e1d811f0f238/scripts/03_initial_cohort_exclusions/clean_tafihp.R
 # -------------------------------------
@@ -30,11 +30,11 @@ icd <-
   collect()
 
 icd_washout <- 
-  join(fselect(cohort, BENE_ID, washout_start_dt, msk_diagnosis_dt), 
+  join(fselect(cohort, BENE_ID, washout_start_dt, washout_end_dt), 
      icd, 
      how = "inner") |> 
   fmutate(SRVC_BGN_DT = fifelse(is.na(SRVC_BGN_DT), SRVC_END_DT, SRVC_BGN_DT)) |> 
-  fsubset(SRVC_BGN_DT %within% interval(washout_start_dt, msk_diagnosis_dt)) |> 
+  fsubset(SRVC_BGN_DT %within% interval(washout_start_dt, washout_end_dt)) |> 
   as_tibble()
 
 # Identify whether exclusion ICD code of interest occurs in washout ICDs

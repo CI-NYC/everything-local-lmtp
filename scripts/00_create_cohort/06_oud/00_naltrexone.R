@@ -41,7 +41,7 @@ rxl <-
 
 rxl_nal <- 
   fsubset(rxl, BENE_ID %in% cohort$BENE_ID) |> 
-  fmutate(moud_end_dt = RX_FILL_DT + days(DAYS_SUPPLY + 21)) |> 
+  fmutate(moud_end_dt = RX_FILL_DT + days(DAYS_SUPPLY - 1 + 21)) |> 
   fselect(BENE_ID, moud_start_dt = RX_FILL_DT, moud_end_dt) |> 
   funique()
 
@@ -70,7 +70,7 @@ otl_ndc_nal <-
     is.na(LINE_SRVC_BGN_DT) ~ LINE_SRVC_END_DT, 
     TRUE ~ LINE_SRVC_BGN_DT
   )) |> 
-  fmutate(moud_end_dt = LINE_SRVC_BGN_DT + 21 + 30) |> 
+  fmutate(moud_end_dt = LINE_SRVC_BGN_DT + 21 + 29) |> 
   fselect(BENE_ID, moud_start_dt = LINE_SRVC_BGN_DT, moud_end_dt) |> 
   funique()
 
@@ -95,7 +95,7 @@ otl_hcpcs_nal <-
   fsubset(otl_hcpcs_nal, BENE_ID %in% cohort$BENE_ID) |> 
   fmutate(
     LINE_SRVC_BGN_DT = fifelse(is.na(LINE_SRVC_BGN_DT), LINE_SRVC_END_DT, LINE_SRVC_BGN_DT), 
-    moud_end_dt = LINE_SRVC_BGN_DT + 21 + 30
+    moud_end_dt = LINE_SRVC_BGN_DT + 21 + 29
   ) |> 
   fselect(BENE_ID, moud_start_dt = LINE_SRVC_BGN_DT, moud_end_dt) |> 
   funique()
@@ -120,7 +120,7 @@ moud_nal <-
   join(cohort, how = "left") |> 
   fmutate(moud_nal_washout = int_overlaps(
     interval(moud_start_dt, moud_end_dt),
-    interval(washout_start_dt, msk_diagnosis_dt)
+    interval(washout_start_dt, washout_end_dt)
   )) |> 
   fgroup_by(BENE_ID) |> 
   fsummarise(moud_nal_washout = as.numeric(sum(moud_nal_washout) > 0))
