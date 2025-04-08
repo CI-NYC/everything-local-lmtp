@@ -10,11 +10,14 @@ library(lubridate)
 library(fst)
 library(collapse)
 
-# Load cohort
-cohort <- load_data("msk_washout_continuous_enrollment_opioid_requirements.fst")
+source("R/helpers.R")
 
+# Load cohort
+for (i in c("", "_7_day_gap"))
+{
+  cohort <- load_data(paste0("msk_washout_continuous_enrollment_opioid_requirements_with_exposures", i, ".fst"))
 # Load study pain opioids
-opioids <- load_data("msk_washout_continuous_enrollment_opioid_requirements_pain_opioids_dts.fst")
+opioids <- load_data(paste0("msk_washout_continuous_enrollment_opioid_requirements_pain_opioids_dts", i, ".fst"))
 
 washout_oud_misuse <- 
   fsubset(opioids, RX_FILL_DT %within% interval(washout_start_dt, washout_end_dt)) |> 
@@ -46,4 +49,5 @@ washout_oud_misuse <-
   fmutate(exclusion_oud_misuse = replace_na(exclusion_oud_misuse, 0))
 
 # export
-write_data(washout_oud_misuse, "msk_washout_continuous_enrollment_opioid_requirements_washout_oud_misuse.fst")
+write_data(washout_oud_misuse, paste0("msk_washout_continuous_enrollment_opioid_requirements_washout_oud_misuse", i, ".fst"))
+}

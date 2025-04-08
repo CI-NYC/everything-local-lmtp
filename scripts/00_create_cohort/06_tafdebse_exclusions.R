@@ -19,6 +19,8 @@ library(stringr)
 
 source("R/helpers.R")
 
+set.seed(9)
+
 cohort <- load_data("msk_washout_continuous_enrollment_opioid_requirements.fst")
 
 codes <- read_yaml("data/public/eligibility_codes.yml")
@@ -63,7 +65,8 @@ exclusion_age <- fselect(cohort, BENE_ID) |>
 # sex ---------------------------------------------------------------------
 
 exclusion_sex <- 
-  fselect(demo, BENE_ID, SEX_CD) |> 
+  fselect(demo, BENE_ID, washout_start_dt, SEX_CD, RFRNC_YR) |> 
+  fsubset(year(washout_start_dt) == as.numeric(RFRNC_YR)) |> 
   funique() |> 
   fmutate(exclusion_missing_sex = as.numeric(is.na(SEX_CD)), 
           .keep = c("BENE_ID", "exclusion_missing_sex"))

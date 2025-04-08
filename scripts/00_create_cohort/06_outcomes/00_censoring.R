@@ -14,8 +14,12 @@ library(yaml)
 
 source("R/helpers.R")
 
-cohort <- load_data("msk_washout_continuous_enrollment_opioid_requirements.fst")
-# codes for dual eligibility
+for (i in c("", "_7_day_gap"))
+{
+
+    cohort <- load_data(paste0("msk_washout_continuous_enrollment_opioid_requirements_with_exposures", i, ".fst"))
+  
+  # codes for dual eligibility
 codes <- read_yaml("data/public/eligibility_codes.yml")
 
 # Create outcome periods
@@ -120,7 +124,7 @@ dual_codes2 <-
           year = as.numeric(RFRNC_YR),
           elig_dt = as.Date(paste0(year, "-", month, "-01"))) |> 
   join(cohort, how = "inner") |> 
-  fselect(BENE_ID, washout_start_dt, min_opioid_dt, code, elig_dt) |> 
+  fselect(BENE_ID, washout_start_dt, min_opioid_date, code, elig_dt) |> 
   fsubset(code %in% codes$dual_eligibility)
 
 dual_cens2 <- 
@@ -156,4 +160,5 @@ cens <-
 # flip censoring indicators (in lmtp, 1 indicates still observed)
 cens <- mutate(cens, across(starts_with("cens"), \(x) ifelse(x == 0, 1, 0)))
 
-write_data(cens, "msk_washout_continuous_enrollment_opioid_requirements_censoring.fst")
+write_data(cens, paste0("msk_washout_continuous_enrollment_opioid_requirements_censoring", i, ".fst"))
+}

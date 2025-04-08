@@ -17,7 +17,7 @@ library(ranger)
 
 drv_root <- "/mnt/general-data/disability/everything-local-lmtp/"
 
-df <- fst::read_fst(paste0(drv_root ,"msk_cohort_clean_imputed.fst")) |>
+df <- fst::read_fst(paste0(drv_root ,"msk_cohort_clean_imputed_7_day_gap.fst")) |>
   as.data.table()
 
 W <- c(
@@ -75,38 +75,38 @@ run_lmtp <- function(data, t, shift, conditional)
   
   if(conditional %in% c("cohort", "subset_B_not_risky_days", "subset_B_under_20", "subset_B_days_7_dose_under_20"))
   {
-  if(shift == "obs")
-  {
-    shifted <- NULL
-  } else if (shift == "d1")
-  {
-    shifted <- data |>
-      mutate(exposure_max_daily_dose_mme = ifelse(0.8 * exposure_max_daily_dose_mme >= min(exposure_max_daily_dose_mme), 0.8 * exposure_max_daily_dose_mme, exposure_max_daily_dose_mme), # reduce MME by 20%
-             cens_period_1 = 1,
-             cens_period_2 = 1,
-             cens_period_3 = 1,
-             cens_period_4 = 1,
-             cens_period_5 = 1)
-  } else if (shift == "d2")
-  {
-    shifted <- data |>
-      mutate(exposure_days_supply = ifelse(0.8 * exposure_days_supply >= min(exposure_days_supply), 0.8 * exposure_days_supply, exposure_days_supply), # reduce days supplied by 20%
-             cens_period_1 = 1,
-             cens_period_2 = 1,
-             cens_period_3 = 1,
-             cens_period_4 = 1,
-             cens_period_5 = 1)
-  }else 
-  {
-    shifted <- data |>
-      mutate(exposure_max_daily_dose_mme = ifelse(0.8 * exposure_max_daily_dose_mme >= min(exposure_max_daily_dose_mme), 0.8 * exposure_max_daily_dose_mme, exposure_max_daily_dose_mme), # reduce MME by 20%
-             exposure_days_supply = ifelse(0.8 * exposure_days_supply >= min(exposure_days_supply), 0.8 * exposure_days_supply, exposure_days_supply), # reduce days supplied by 20%
-             cens_period_1 = 1,
-             cens_period_2 = 1,
-             cens_period_3 = 1,
-             cens_period_4 = 1,
-             cens_period_5 = 1)
-  } 
+    if(shift == "obs")
+    {
+      shifted <- NULL
+    } else if (shift == "d1")
+    {
+      shifted <- data |>
+        mutate(exposure_max_daily_dose_mme = ifelse(0.8 * exposure_max_daily_dose_mme >= min(exposure_max_daily_dose_mme), 0.8 * exposure_max_daily_dose_mme, exposure_max_daily_dose_mme), # reduce MME by 20%
+               cens_period_1 = 1,
+               cens_period_2 = 1,
+               cens_period_3 = 1,
+               cens_period_4 = 1,
+               cens_period_5 = 1)
+    } else if (shift == "d2")
+    {
+      shifted <- data |>
+        mutate(exposure_days_supply = ifelse(0.8 * exposure_days_supply >= min(exposure_days_supply), 0.8 * exposure_days_supply, exposure_days_supply), # reduce days supplied by 20%
+               cens_period_1 = 1,
+               cens_period_2 = 1,
+               cens_period_3 = 1,
+               cens_period_4 = 1,
+               cens_period_5 = 1)
+    }else 
+    {
+      shifted <- data |>
+        mutate(exposure_max_daily_dose_mme = ifelse(0.8 * exposure_max_daily_dose_mme >= min(exposure_max_daily_dose_mme), 0.8 * exposure_max_daily_dose_mme, exposure_max_daily_dose_mme), # reduce MME by 20%
+               exposure_days_supply = ifelse(0.8 * exposure_days_supply >= min(exposure_days_supply), 0.8 * exposure_days_supply, exposure_days_supply), # reduce days supplied by 20%
+               cens_period_1 = 1,
+               cens_period_2 = 1,
+               cens_period_3 = 1,
+               cens_period_4 = 1,
+               cens_period_5 = 1)
+    } 
   } else
   {
     if(shift == "obs")
@@ -177,9 +177,9 @@ set.seed(5)
 for(t in 1:5)
 {
   for(shift in c("obs",
-                "d1",
-                 "d2",
-                 "d3"
+    "d1",
+    "d2",
+    "d3"
   ))
   { 
     for(subset in c("subset_B1",
@@ -192,7 +192,7 @@ for(t in 1:5)
       "subset_B8",
       "cohort",
       "subset_B_not_risky_days",
-      "subset_B_under_20", # START HERE
+      "subset_B_under_20",
       "subset_B_days_7_dose_under_20"
     ))
     {
@@ -206,7 +206,7 @@ for(t in 1:5)
           
           finished <- TRUE # if success, mark as finished to exit loop
           
-          saveRDS(results, paste0("/mnt/general-data/disability/everything-local-lmtp/results_final_r1/", shift, "_", subset, "_time_", t, ".rds"))
+          saveRDS(results, paste0("/mnt/general-data/disability/everything-local-lmtp/results_final_r1/", shift, "_", subset, "_time_", t, "_7_day_gap.rds"))
         }, error = function(e){
           cat("Error on time ", t, ", shift: ", shift, ", subset: ", subset,
               e$message)})

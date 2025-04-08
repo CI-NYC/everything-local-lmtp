@@ -4,7 +4,7 @@
 # Purpose:
 # Notes:
 # -------------------------------------
-#devtools::install_github("nt-williams/riesznet", auth_token = "TOKEN", force = TRUE)
+#ar
 library(lmtp, lib.loc = "/mnt/dev/lmtp-local-riesznet")
 library(riesznet)
 library(tidyverse)
@@ -75,38 +75,38 @@ run_lmtp <- function(data, t, shift, conditional)
   
   if(conditional %in% c("cohort", "subset_B_not_risky_days", "subset_B_under_20", "subset_B_days_7_dose_under_20"))
   {
-  if(shift == "obs")
-  {
-    shifted <- NULL
-  } else if (shift == "d1")
-  {
-    shifted <- data |>
-      mutate(exposure_max_daily_dose_mme = ifelse(0.8 * exposure_max_daily_dose_mme >= min(exposure_max_daily_dose_mme), 0.8 * exposure_max_daily_dose_mme, exposure_max_daily_dose_mme), # reduce MME by 20%
-             cens_period_1 = 1,
-             cens_period_2 = 1,
-             cens_period_3 = 1,
-             cens_period_4 = 1,
-             cens_period_5 = 1)
-  } else if (shift == "d2")
-  {
-    shifted <- data |>
-      mutate(exposure_days_supply = ifelse(0.8 * exposure_days_supply >= min(exposure_days_supply), 0.8 * exposure_days_supply, exposure_days_supply), # reduce days supplied by 20%
-             cens_period_1 = 1,
-             cens_period_2 = 1,
-             cens_period_3 = 1,
-             cens_period_4 = 1,
-             cens_period_5 = 1)
-  }else 
-  {
-    shifted <- data |>
-      mutate(exposure_max_daily_dose_mme = ifelse(0.8 * exposure_max_daily_dose_mme >= min(exposure_max_daily_dose_mme), 0.8 * exposure_max_daily_dose_mme, exposure_max_daily_dose_mme), # reduce MME by 20%
-             exposure_days_supply = ifelse(0.8 * exposure_days_supply >= min(exposure_days_supply), 0.8 * exposure_days_supply, exposure_days_supply), # reduce days supplied by 20%
-             cens_period_1 = 1,
-             cens_period_2 = 1,
-             cens_period_3 = 1,
-             cens_period_4 = 1,
-             cens_period_5 = 1)
-  } 
+    if(shift == "obs")
+    {
+      shifted <- NULL
+    } else if (shift == "d1")
+    {
+      shifted <- data |>
+        mutate(exposure_max_daily_dose_mme = ifelse(0.8 * exposure_max_daily_dose_mme >= min(exposure_max_daily_dose_mme), 0.8 * exposure_max_daily_dose_mme, exposure_max_daily_dose_mme), # reduce MME by 20%
+               cens_period_1 = 1,
+               cens_period_2 = 1,
+               cens_period_3 = 1,
+               cens_period_4 = 1,
+               cens_period_5 = 1)
+    } else if (shift == "d2")
+    {
+      shifted <- data |>
+        mutate(exposure_days_supply = ifelse(0.8 * exposure_days_supply >= min(exposure_days_supply), 0.8 * exposure_days_supply, exposure_days_supply), # reduce days supplied by 20%
+               cens_period_1 = 1,
+               cens_period_2 = 1,
+               cens_period_3 = 1,
+               cens_period_4 = 1,
+               cens_period_5 = 1)
+    }else 
+    {
+      shifted <- data |>
+        mutate(exposure_max_daily_dose_mme = ifelse(0.8 * exposure_max_daily_dose_mme >= min(exposure_max_daily_dose_mme), 0.8 * exposure_max_daily_dose_mme, exposure_max_daily_dose_mme), # reduce MME by 20%
+               exposure_days_supply = ifelse(0.8 * exposure_days_supply >= min(exposure_days_supply), 0.8 * exposure_days_supply, exposure_days_supply), # reduce days supplied by 20%
+               cens_period_1 = 1,
+               cens_period_2 = 1,
+               cens_period_3 = 1,
+               cens_period_4 = 1,
+               cens_period_5 = 1)
+    } 
   } else
   {
     if(shift == "obs")
@@ -173,27 +173,29 @@ run_lmtp <- function(data, t, shift, conditional)
 
 # code is run one iteration at a time, match subset with correct shift
 
-set.seed(5)
-for(t in 1:5)
+for (s in 1:1)
 {
-  for(shift in c("obs",
-                "d1",
-                 "d2",
-                 "d3"
+set.seed(s)
+for(t in 5:5) 
+{
+  for(shift in c(#"obs"#,
+    #"d1"#,
+    #"d2"#,
+    "d3"
   ))
   { 
-    for(subset in c("subset_B1",
-      "subset_B2",
-      "subset_B3",
-      "subset_B4",
-      "subset_B5",
-      "subset_B6",
-      "subset_B7",
-      "subset_B8",
-      "cohort",
-      "subset_B_not_risky_days",
-      "subset_B_under_20", # START HERE
-      "subset_B_days_7_dose_under_20"
+    for(subset in c(#"subset_B1"#,
+      #"subset_B2"#,
+      #"subset_B3"#,
+      #"subset_B4"#,
+      #"subset_B5"#,
+      #"subset_B6"#,
+      #"subset_B7"#,
+      "subset_B8"#,
+      #"cohort"#,
+      #"subset_B_not_risky_days"#,
+      #"subset_B_under_20"#,
+      #"subset_B_days_7_dose_under_20"
     ))
     {
       finished <- FALSE
@@ -206,7 +208,7 @@ for(t in 1:5)
           
           finished <- TRUE # if success, mark as finished to exit loop
           
-          saveRDS(results, paste0("/mnt/general-data/disability/everything-local-lmtp/results_final_r1/", shift, "_", subset, "_time_", t, ".rds"))
+          saveRDS(results, paste0("/mnt/general-data/disability/everything-local-lmtp/results_final_r1/", shift, "_", subset, "_time_", t, "_seed_", s, ".rds"))
         }, error = function(e){
           cat("Error on time ", t, ", shift: ", shift, ", subset: ", subset,
               e$message)})
@@ -215,3 +217,27 @@ for(t in 1:5)
     }
   }
 }
+}
+
+## getting results
+
+results_list <- list()
+
+for (s in 1:10)
+{
+  results_list[[s]] <-1 - readRDS(paste0("/mnt/general-data/disability/everything-local-lmtp/results_final_r1/d3_subset_B8_time_5_seed_", s, ".rds"))$theta
+}
+
+var(unlist(results_list))
+
+pdf("~/everything-local-lmtp/figures/testing_seed.pdf") 
+
+plot(unlist(results_list),
+     xlab = "Seed", ylab = "Estimate")
+
+dev.off()
+
+
+
+
+

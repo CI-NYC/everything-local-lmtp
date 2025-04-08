@@ -10,10 +10,13 @@ library(arrow)
 library(tidyverse)
 library(lubridate)
 library(collapse)
+library(data.table)
 library(fst)
 library(yaml)
 
 source("R/helpers.R")
+
+set.seed(9)
 
 cohort <- load_data("msk_washout_continuous_enrollment_opioid_requirements.fst")
 

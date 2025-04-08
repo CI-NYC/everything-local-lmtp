@@ -19,6 +19,9 @@ source("R/helpers.R")
 # Load washout dates
 washout <- load_data("msk_washout_opioid_requirements.fst")
 
+# number of people at start
+start_n <- washout |> nrow()
+
 # Load temporary files for 01_01_filter_continuous_enrollment.R
 files <- 
   "/mnt/general-data/disability/everything-local-lmtp/tmp" |> 
@@ -31,8 +34,9 @@ find_enrollment_periods <- function(data) {
     out <- data.table(BENE_ID = data$BENE_ID, 
                       washout_start_dt = data$washout_start_dt, 
                       msk_diagnosis_dt = data$msk_diagnosis_dt,
-                      exposure_end_dt = data$exposure_end_dt, 
+                      washout_end_dt = data$washout_end_dt, 
                       min_opioid_date = data$min_opioid_date,
+                      exposure_end_dt_possible_latest = data$exposure_end_dt_possible_latest, 
                       enrollment_start_dt = data$ENRLMT_START_DT, 
                       enrollment_end_dt = data$ENRLMT_END_DT)
   } else {
@@ -70,13 +74,14 @@ find_enrollment_periods <- function(data) {
     out <- data.table(BENE_ID = data$BENE_ID[1], 
                       washout_start_dt = data$washout_start_dt[1], 
                       msk_diagnosis_dt = data$msk_diagnosis_dt[1],
+                      washout_end_dt = data$washout_end_dt[1], 
                       min_opioid_date = data$min_opioid_date[1],
-                      exposure_end_dt = data$exposure_end_dt[1], 
+                      exposure_end_dt_possible_latest = data$exposure_end_dt_possible_latest[1], 
                       enrollment_start_dt = as.Date(int_start(enrollment_period)), 
                       enrollment_end_dt = as.Date(int_end(enrollment_period)))
   }
 
-  out[(washout_start_dt >= enrollment_start_dt) & (washout_end_dt < enrollment_end_dt)] # must be enrolled for 6 month washout
+  out[(washout_start_dt >= enrollment_start_dt) & (washout_end_dt < enrollment_end_dt)] # must be enrolled for full 6 month washout
 }
 
 # # Test case
@@ -113,6 +118,14 @@ cohort <-
   rbindlist()
 
 washout <- merge(washout, cohort)
+
+washout <- washout |>
+  distinct()
+
+end_n <- washout |> nrow()
+
+# number of people removed
+print(start_n - end_n)
 
 # export
 write_data(washout, "msk_washout_continuous_enrollment_opioid_requirements.fst")

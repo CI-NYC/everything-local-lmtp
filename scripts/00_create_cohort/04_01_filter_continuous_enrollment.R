@@ -31,7 +31,7 @@ setDT(dates, key = "BENE_ID")
 
 dates <- dates[order(rleid(BENE_ID), ENRLMT_START_DT)]
 dates <- dates[!is.na(ENRLMT_START_DT) & !is.na(ENRLMT_END_DT)]
-dates <- dates[ENRLMT_START_DT <= exposure_end_dt]
+dates <- dates[ENRLMT_START_DT <= exposure_end_dt_possible_latest]
 
 idx <- split(seq_len(nrow(dates)), list(dates$BENE_ID))
 tmp <- lapply(idx, \(x) dates[x])

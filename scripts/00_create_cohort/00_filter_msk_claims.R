@@ -94,4 +94,4 @@ setnames(msk, "SRVC_BGN_DT", "msk_diagnosis_dt")
 write_data(as.data.table(distinct(msk)), "msk_washout_dts.fst")
 
 # number of people with MSK pain claims
-msk |> nrow() #4,227,282
+msk |> distinct() |> nrow() #4,218,772

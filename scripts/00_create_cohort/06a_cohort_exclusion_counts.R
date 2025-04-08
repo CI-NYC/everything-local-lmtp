@@ -21,12 +21,6 @@ iph_exclusions <- load_data("msk_washout_continuous_enrollment_opioid_requiremen
 oth_exclusions <- load_data("msk_washout_continuous_enrollment_opioid_requirements_tafoth_exclusions.fst")
 # oud exclusions
 oud_exclusions <- load_data("msk_washout_continuous_enrollment_opioid_requirements_oud_exclusion.fst")
-# exposures
-exposures <- load_data("exposures_with_subsets.fst")
-# censoring
-cens <- load_data("msk_washout_continuous_enrollment_opioid_requirements_censoring.fst")
-# outcomes
-outcomes <- load_data("msk_washout_continuous_enrollment_opioid_requirements_oud_outcomes.fst")
 
 cohort <- list(
   cohort, 

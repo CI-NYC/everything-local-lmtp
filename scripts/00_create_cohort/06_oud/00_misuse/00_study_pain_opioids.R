@@ -16,8 +16,9 @@ library(collapse)
 source("R/helpers.R")
 
 # Load cohort
-cohort <- load_data("msk_washout_continuous_enrollment_opioid_requirements.fst")
-
+for (i in c("", "_7_day_gap"))
+{
+  cohort <- load_data(paste0("msk_washout_continuous_enrollment_opioid_requirements_with_exposures", i, ".fst"))
 # Load opioid pain NDC
 opioids <- read_csv("data/public/opioid_pain_ndc.csv")
 
@@ -62,4 +63,5 @@ opioids <-
   ) |> 
   join(cohort, how = "inner")
 
-write_data(opioids, "msk_washout_continuous_enrollment_opioid_requirements_pain_opioids_dts.fst")
+write_data(opioids, paste0("msk_washout_continuous_enrollment_opioid_requirements_pain_opioids_dts", i, ".fst"))
+}

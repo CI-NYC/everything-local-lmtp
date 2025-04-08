@@ -17,8 +17,9 @@ source("R/helpers.R")
 # Source ICD codes
 codes <- read_yaml("data/public/oud_codes.yml")$cochran_poison
 
-cohort <- load_data("msk_washout_continuous_enrollment_opioid_requirements.fst")
-
+for (i in c("", "_7_day_gap"))
+{
+  cohort <- load_data(paste0("msk_washout_continuous_enrollment_opioid_requirements_with_exposures", i, ".fst"))
 # Read in IPH dataset
 iph <- open_iph()
 
@@ -59,4 +60,5 @@ oud_poison <-
   inner_join(oud_poison, cohort) |> 
   filter(oud_poison_dt %within% interval(washout_start_dt, exposure_end_dt + 455))
 
-write_data(oud_poison, "msk_washout_continuous_enrollment_opioid_requirements_oud_poison_dts.fst")
+write_data(oud_poison, paste0("msk_washout_continuous_enrollment_opioid_requirements_oud_poison_dts", i, ".fst"))
+}

@@ -23,21 +23,7 @@ drv_root <- "/mnt/general-data/disability/everything-local-lmtp/"
 
 analysis_cohort <- fst::read_fst(paste0(drv_root ,"msk_cohort_with_MH.fst")) |>
   as.data.table() |>
-  mutate(conditional_group = case_when(subset_B3 == "TRUE" ~ 4,
-                                       subset_B2 == "TRUE" ~ 3,
-                                       subset_B1 == "TRUE" ~ 2,
-                                       subset_B3 == "FALSE" & subset_B2 == "FALSE" & subset_B1 == "FALSE" ~ 1)) |>
-  mutate(subset_B4 = ifelse(exposure_max_daily_dose_mme >= 90, TRUE, FALSE),
-         subset_B5 = ifelse(exposure_max_daily_dose_mme >= 90 & exposure_days_supply > 7, TRUE, FALSE),
-         subset_B6 = ifelse(exposure_days_supply > 30, TRUE, FALSE),
-         subset_B7 = ifelse(exposure_days_supply > 30 & exposure_max_daily_dose_mme >= 50, TRUE, FALSE),
-         subset_B8 = ifelse(exposure_days_supply > 30 & exposure_max_daily_dose_mme >= 90, TRUE, FALSE)
-  ) |>
-  mutate(subset_B_under_20 = ifelse(exposure_max_daily_dose_mme <= 20, TRUE, FALSE),
-         subset_B_days_7_dose_under_20 = ifelse(exposure_days_supply <= 7 & exposure_max_daily_dose_mme <= 20, TRUE, FALSE),
-         subset_B_not_risky_days = ifelse(exposure_days_supply <= 7, TRUE, FALSE),
-         subset_cohort = TRUE
-  )
+  mutate(subset_cohort = TRUE)
 
 num_opioids <- readRDS("/mnt/general-data/disability/everything-local-lmtp/num_opioids.rds")
 
@@ -57,6 +43,7 @@ dem_tbl_data <- analysis_cohort |>
          dem_veteran,
          dem_tanf_benefits,
          dem_ssi_benefits,
+         has_2plus_ED_visit_exposure,
          subset_B1,
          subset_B2,
          subset_B3,

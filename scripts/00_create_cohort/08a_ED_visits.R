@@ -9,8 +9,10 @@ library(data.table)
 
 source("~/everything-local-lmtp/R/helpers.R")
 
+for (i in c("", "_7_day_gap"))
+{
 # getting all opioids for cohort within exposure period
-opioids <- load_data("exposure_period_opioids.fst") |>
+opioids <- load_data(paste0("exposure_period_opioids", i, "_ACTUAL.fst")) |>
   select(BENE_ID, exposure_end_dt, rx_end_dt) |>
   mutate(rx_end_dt = case_when(rx_end_dt > exposure_end_dt ~ exposure_end_dt, # only looking until the end of the exposure period
                                TRUE ~ rx_end_dt
@@ -19,7 +21,8 @@ opioids <- load_data("exposure_period_opioids.fst") |>
 # finding latest opioid date per beneficiary
 opioids_grouped <- opioids |>
   select(BENE_ID, exposure_end_dt) |>
-  distinct()
+  distinct() |>
+  as.data.table()
 
 # getting ED visits
 claims <- readRDS("/mnt/general-data/disability/pain-severity/intermediate/visits_cleaned_with_procedures_and_inpatients_excluded.rds")
@@ -46,4 +49,5 @@ claims_final <- merge(claims_exposure_period,
 fix <- c("has_1_ED_visit_exposure", "has_2plus_ED_visit_exposure")
 claims_final[, (fix) := lapply(.SD, \(x) fifelse(is.na(x), 0, x)), .SDcols = fix]
 
-saveRDS(claims_final, file.path("/mnt/general-data/disability/everything-local-lmtp", "confounder_num_ED_visit.rds"))
+saveRDS(claims_final, file.path("/mnt/general-data/disability/everything-local-lmtp", paste0("confounder_num_ED_visit", i, ".rds")))
+}

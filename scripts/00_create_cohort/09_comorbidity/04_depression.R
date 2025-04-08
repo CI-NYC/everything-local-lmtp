@@ -101,7 +101,7 @@ all_dg_clean_function  <- function(data, x)
   ))
   
   data |>
-    left_join(dts_cohorts |> select(BENE_ID, washout_start_dt)) |>
+    left_join(dts_cohorts |> select(BENE_ID, washout_start_dt, washout_end_dt)) |>
     group_by(BENE_ID) |>
     filter(SRVC_BGN_DT <= washout_end_dt + num_days_end,
            SRVC_END_DT >= washout_start_dt + num_days_start) |>

@@ -3,7 +3,7 @@
 # Author: Nick Williams
 # Purpose: Identify MOUD buprenorphine periods
 # Notes:
-#   - 3 week (21 day) grace period is used (20 when including start date)
+#   - 3 week (21 day) grace period is used
 # -------------------------------------
 
 library(arrow)
@@ -16,7 +16,9 @@ library(yaml)
 
 source("R/helpers.R")
 
-cohort <- load_data("msk_washout_continuous_enrollment_opioid_requirements.fst")
+for (i in c("", "_7_day_gap"))
+{
+cohort <- load_data(paste0("msk_washout_continuous_enrollment_opioid_requirements_with_exposures", i, ".fst"))
 
 bup_list <- read_fst("data/public/bup_list.fst")
 hcpcs <- read_yaml("data/public/hcpcs_codes.yml")$buprenorphine
@@ -47,7 +49,7 @@ rxl_buprenorphine <-
           strength_per_day = strength * pills_per_day) |> 
   fsubset(check == 0 | 
             (check == 1 & strength_per_day >= 10 & strength_per_day < 50)) |> 
-  fmutate(moud_end_dt = RX_FILL_DT + days(DAYS_SUPPLY + 21)) |> 
+  fmutate(moud_end_dt = RX_FILL_DT + days(DAYS_SUPPLY - 1 + 21)) |> 
   fselect(BENE_ID, moud_start_dt = RX_FILL_DT, moud_end_dt) |> 
   funique()
 
@@ -149,7 +151,7 @@ bup <-
   funique()
 
 # - Save all moud periods for the initial cohort
-write_data(bup, "msk_washout_continuous_enrollment_opioid_requirements_moud_bup_intervals.fst")
+write_data(bup, paste0("msk_washout_continuous_enrollment_opioid_requirements_moud_bup_intervals", i, ".fst"))
 
 moud_bup <- 
   roworder(bup, BENE_ID, moud_start_dt) |> 
@@ -166,4 +168,5 @@ moud_bup <-
   join(cohort, moud_bup, how = "left") |> 
   fmutate(moud_bup_washout = replace_na(moud_bup_washout, 0))
 
-write_data(moud_bup, "msk_washout_continuous_enrollment_opioid_requirements_moud_bup_washout.fst")
+write_data(moud_bup, paste0("msk_washout_continuous_enrollment_opioid_requirements_moud_bup_washout", i, ".fst"))
+}

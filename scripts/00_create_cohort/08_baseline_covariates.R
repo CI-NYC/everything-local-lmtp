@@ -48,7 +48,7 @@ demo <-
 fill_vals <- function(data, x) {
     select(data, BENE_ID, RFRNC_YR, one_of(x))  |>
     roworder(BENE_ID, RFRNC_YR) |>
-    filter(if (x == "BIRTH_DT" | x == "SEX_CD") !is.na(.data[[x]]) else TRUE) |> # these values shouldn't change
+    filter(if (x == "BIRTH_DT" | x == "SEX_CD") !is.na(.data[[x]]) else TRUE) |> # these values shouldn't be NA
     group_by(BENE_ID) |>
     filter(row_number() == 1) |>
     fselect(-RFRNC_YR) |>
@@ -117,4 +117,51 @@ cohort <-
          cens_hillary_period_5, oud_hillary_period_5)
 
 write_data(cohort, "msk_cohort.fst")
+
+rm(cohort)
+### 7 day gap
+
+cohort <- load_data("inclusion_exclusion_cohort_with_exposure_outcomes_7_day_gap.fst") |>
+  select(BENE_ID, 
+         ends_with("dt", ignore.case = FALSE), 
+         starts_with("exposure"), 
+         starts_with("subset"), 
+         cens_period_1, oud_period_1, 
+         cens_period_2, oud_period_2, 
+         cens_period_3, oud_period_3, 
+         cens_period_4, oud_period_4, 
+         cens_period_5, oud_period_5,
+         cens_hillary_period_1, oud_hillary_period_1,
+         cens_hillary_period_2, oud_hillary_period_2,
+         cens_hillary_period_3, oud_hillary_period_3,
+         cens_hillary_period_4, oud_hillary_period_4,
+         cens_hillary_period_5, oud_hillary_period_5)
+
+dem <- load_data("msk_cohort.fst") |>
+  select(BENE_ID, 
+         starts_with("dem"))
+
+cohort <- cohort |>
+  left_join(dem) |>
+  select(BENE_ID, 
+         ends_with("dt", ignore.case = FALSE), 
+         starts_with("dem"),
+         starts_with("exposure"), 
+         starts_with("subset"), 
+         cens_period_1, oud_period_1, 
+         cens_period_2, oud_period_2, 
+         cens_period_3, oud_period_3, 
+         cens_period_4, oud_period_4, 
+         cens_period_5, oud_period_5,
+         cens_hillary_period_1, oud_hillary_period_1,
+         cens_hillary_period_2, oud_hillary_period_2,
+         cens_hillary_period_3, oud_hillary_period_3,
+         cens_hillary_period_4, oud_hillary_period_4,
+         cens_hillary_period_5, oud_hillary_period_5)
+ 
+write_data(cohort, "msk_cohort_7_day_gap.fst")
+
+
+
+
 

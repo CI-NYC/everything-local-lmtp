@@ -35,49 +35,10 @@ ndc_opioids <- ndc[opioid_flag]
 
 saveRDS(ndc_opioids, "data/public/ndc_to_atc_opioids.rds")
 
+ndc_opioids <- readRDS("data/public/ndc_to_atc_opioids.rds")
+
+
 # filter rxl and otl files ------------------------------------------------
-
-# Read in RXL (pharmacy line)
-rxl <- open_rxl()
-
-# Read in OTL (Other services line) 
-otl <- open_otl()
-
-# Find beneficiaries with an opioid prior to MSK diagnosis in OTL
-otl <- 
-  select(otl, BENE_ID, CLM_ID, LINE_SRVC_BGN_DT, LINE_SRVC_END_DT, NDC) |> 
-  inner_join(cohort, by = "BENE_ID") |> 
-  mutate(LINE_SRVC_BGN_DT = ifelse(
-    is.na(LINE_SRVC_BGN_DT), 
-    LINE_SRVC_END_DT, 
-    LINE_SRVC_BGN_DT)
-  ) |> 
-  filter((LINE_SRVC_BGN_DT < msk_diagnosis_dt), 
-         NDC %in% ndc_opioids$NDC) |> 
-  select(BENE_ID) |> 
-  distinct()
-
-otl <- collect(otl) |> as.data.table()
-
-# Find beneficiaries with an opioid prior to MSK diagnosis in RXL
-rxl <- 
-  select(rxl, BENE_ID, CLM_ID, RX_FILL_DT, NDC) |> 
-  inner_join(cohort, by = "BENE_ID") |> 
-  filter((RX_FILL_DT < msk_diagnosis_dt), 
-         NDC %in% ndc_opioids$NDC) |> 
-  select(BENE_ID) |> 
-  distinct()
-
-rxl <- collect(rxl) |> as.data.table()
-
-# remove observations with opioid in washout period
-remove <- rbind(otl, rxl) |> unique()
-
-# number of patients with opioids prior to MSK diagnosis
-remove |> nrow()
-
-cohort <- anti_join(cohort, remove)
-
 # Read in RXL (pharmacy line)
 rxl <- open_rxl()
 
@@ -95,7 +56,8 @@ otl <-
   )) |> 
   filter((LINE_SRVC_BGN_DT >= msk_diagnosis_dt) & 
            (LINE_SRVC_BGN_DT <= opioid_start_dt_possible_latest), 
-         NDC %in% ndc_opioids$NDC) |> 
+         NDC %in% ndc_opioids$NDC,
+         !(NDC %in% c("27505005036", "27505005096"))) |> # lucemyra -- not an opioid
   select(BENE_ID, LINE_SRVC_BGN_DT) |>
   distinct()
 
@@ -103,12 +65,14 @@ otl <- collect(otl) |> as.data.table()
 
 # Find beneficiaries with an opioid following MSK in OTL
 rxl <- 
-  select(rxl, BENE_ID, CLM_ID, RX_FILL_DT, NDC) |> 
+  #select(rxl, BENE_ID, CLM_ID, RX_FILL_DT, NDC) |> 
+  rxl |>
   inner_join(cohort, by = "BENE_ID") |> 
   filter((RX_FILL_DT >= msk_diagnosis_dt) & 
            (RX_FILL_DT <= opioid_start_dt_possible_latest), 
-         NDC %in% ndc_opioids$NDC) |> 
-  select(BENE_ID, RX_FILL_DT) |> 
+         NDC %in% ndc_opioids$NDC,
+         !(NDC %in% c("27505005036", "27505005096"))) |> # lucemyra -- not an opioid
+  #select(BENE_ID, RX_FILL_DT) |> 
   distinct()
 
 rxl <- collect(rxl) |> as.data.table()
@@ -128,11 +92,8 @@ keep <- unique(rbind(otl_grouped, rxl_grouped)) |>
 
 cohort_with_opioids <- unique(left_join(keep, cohort))
 
-removed <- unique(anti_join(keep, cohort))
-
-# number of people without opioids in 3 month period following initial MSK diagnosis
-removed |> 
-  nrow() 
+# number removed for no opioids in 3 month period following MSK
+nrow(cohort) - nrow(keep)
 
 cohort_with_opioids <- cohort_with_opioids |>
   mutate(washout_start_dt = min_opioid_date - days(182),
@@ -140,4 +101,57 @@ cohort_with_opioids <- cohort_with_opioids |>
          exposure_end_dt_possible_latest = min_opioid_date + days(90)) |>
   select(BENE_ID, washout_start_dt, msk_diagnosis_dt, washout_end_dt, min_opioid_date, exposure_end_dt_possible_latest)
 
-write_data(cohort_with_opioids, "msk_washout_opioid_requirements.fst")
+### LOOKING FOR OPIOIDS IN WASHOUT
+
+# Read in RXL (pharmacy line)
+rxl <- open_rxl()
+
+# Read in OTL (Other services line) 
+otl <- open_otl()
+
+# Find beneficiaries with an opioid prior to MSK diagnosis in OTL (washout)
+otl <- 
+  select(otl, BENE_ID, CLM_ID, LINE_SRVC_BGN_DT, LINE_SRVC_END_DT, NDC) |> 
+  inner_join(cohort_with_opioids, by = "BENE_ID") |> 
+  mutate(LINE_SRVC_BGN_DT = ifelse(
+    is.na(LINE_SRVC_BGN_DT), 
+    LINE_SRVC_END_DT, 
+    LINE_SRVC_BGN_DT),
+    LINE_SRVC_END_DT = ifelse(
+      is.na(LINE_SRVC_END_DT), 
+      LINE_SRVC_BGN_DT, 
+      LINE_SRVC_END_DT),
+    LINE_SRVC_BGN_DT = ifelse(LINE_SRVC_BGN_DT < washout_start_dt & LINE_SRVC_END_DT >= washout_start_dt, washout_start_dt, LINE_SRVC_BGN_DT) # if service began before but ends after washout, then consider start as washout
+  ) |> 
+  filter((LINE_SRVC_BGN_DT < msk_diagnosis_dt & (LINE_SRVC_BGN_DT >= washout_start_dt)), 
+         NDC %in% ndc_opioids$NDC) |> 
+  select(BENE_ID) |> 
+  distinct()
+
+otl <- collect(otl) |> as.data.table()
+
+# Find beneficiaries with an opioid prior to MSK diagnosis in RXL (washout)
+rxl <- 
+  select(rxl, BENE_ID, CLM_ID, RX_FILL_DT, DAYS_SUPPLY, NDC) |> 
+  inner_join(cohort_with_opioids, by = "BENE_ID") |> 
+  collect() |>
+  mutate(RX_END_DT = RX_FILL_DT + DAYS_SUPPLY - 1,
+         RX_FILL_DT = ifelse(RX_FILL_DT < washout_start_dt & RX_END_DT >= washout_start_dt, washout_start_dt, RX_FILL_DT) # if service began before but ends after washout, then consider start as washout
+  ) |>
+  select(-c(DAYS_SUPPLY)) |>
+  filter((RX_FILL_DT < msk_diagnosis_dt & (RX_FILL_DT >= washout_start_dt)), 
+         NDC %in% ndc_opioids$NDC) |> 
+  select(BENE_ID) |> 
+  distinct()
+
+rxl <- rxl |> as.data.table()
+
+# remove observations with opioid in washout period
+remove <- rbind(otl, rxl) |> unique()
+
+# number of patients with opioids prior to MSK diagnosis
+remove |> nrow()
+
+cohort_with_opioids_none_in_washout <- anti_join(cohort_with_opioids, remove)
+
+write_data(cohort_with_opioids_none_in_washout, "msk_washout_opioid_requirements.fst")

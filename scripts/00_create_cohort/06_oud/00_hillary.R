@@ -17,8 +17,11 @@ source("R/helpers.R")
 # Source ICD codes
 codes <- read_yaml("data/public/oud_codes.yml")$hillary
 
-# load cohort
-cohort <- load_data("msk_washout_continuous_enrollment_opioid_requirements.fst")
+for (i in c("", "_7_day_gap"))
+{
+
+# load cohort  
+cohort <- load_data(paste0("msk_washout_continuous_enrollment_opioid_requirements_with_exposures", i, ".fst"))
 
 # Read in IPH dataset
 iph <- open_iph()
@@ -60,4 +63,5 @@ oud_hillary <-
   inner_join(oud_hillary, cohort) |> 
   filter(oud_hillary_dt %within% interval(washout_start_dt, exposure_end_dt + 455))
 
-write_data(oud_hillary, "msk_washout_continuous_enrollment_opioid_requirements_oud_hillary_dts.fst")
+write_data(oud_hillary, paste0("msk_washout_continuous_enrollment_opioid_requirements_oud_hillary_dts", i, ".fst"))
+}

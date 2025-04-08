@@ -68,8 +68,7 @@ rxl_opioids <-
          pills_per_day = number_pills / days_supply,
          strength = parse_number(numeratorValue),
          strength_per_day = strength * pills_per_day,
-         mme_strength_per_day = strength_per_day * conversion, 
-         mme_strength_per_day = pmin(mme_strength_per_day, quantile(mme_strength_per_day, 0.99)))
+         mme_strength_per_day = strength_per_day * conversion)
 
 # keep only relevant vars for RXL opioids
 rxl_opioids <-

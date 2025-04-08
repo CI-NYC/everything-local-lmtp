@@ -12,8 +12,10 @@ library(data.table)
 
 source("R/helpers.R")
 
-# base cohort
-cohort <- load_data("msk_washout_continuous_enrollment_opioid_requirements.fst")
+for (i in c("", "_7_day_gap"))
+{
+  # base cohort
+  cohort <- load_data(paste0("msk_washout_continuous_enrollment_opioid_requirements_with_exposures", i, ".fst"))
 # debse exclusions
 debse_exclusions <- load_data("msk_washout_continuous_enrollment_opioid_requirements_tafdebse_exclusions.fst")
 # iph exclusions
@@ -22,13 +24,12 @@ iph_exclusions <- load_data("msk_washout_continuous_enrollment_opioid_requiremen
 oth_exclusions <- load_data("msk_washout_continuous_enrollment_opioid_requirements_tafoth_exclusions.fst")
 # oud exclusions
 oud_exclusions <- load_data("msk_washout_continuous_enrollment_opioid_requirements_oud_exclusion.fst")
-# exposures
-exposures <- load_data("exposures_with_subsets.fst")
+
 # censoring
-cens <- load_data("msk_washout_continuous_enrollment_opioid_requirements_censoring.fst")
+cens <- load_data(paste0("msk_washout_continuous_enrollment_opioid_requirements_censoring", i, ".fst"))
 # outcomes
-outcomes <- load_data("msk_washout_continuous_enrollment_opioid_requirements_oud_outcomes.fst")
-hillary <- load_data("msk_washout_continuous_enrollment_opioid_requirements_oud_hillary_outcomes.fst")
+outcomes <- load_data(paste0("msk_washout_continuous_enrollment_opioid_requirements_oud_outcomes", i, ".fst"))
+hillary <- load_data(paste0("msk_washout_continuous_enrollment_opioid_requirements_oud_hillary_outcomes", i, ".fst"))
 
 
 cohort <- list(
@@ -46,8 +47,7 @@ cohort <- filter(cohort, if_all(starts_with("exclusion"), \(x) x == 0))
 
 # Add in exposure, outcome, and censoring data
 cohort <- 
-  join(cohort, exposures, how = "left") |> 
-  join(outcomes, how = "left") |> 
+  join(cohort, outcomes, how = "left") |> 
   join(hillary, how = "left") |> 
   join(cens, how = "left") |>
   mutate(cens_hillary_period_1 = cens_period_1,
@@ -93,7 +93,7 @@ cohort <-
   convert_cens_to_na(paste0("oud_period_", 1:5), paste0("cens_period_", 1:5)) |> 
   convert_outcome_to_na(paste0("oud_hillary_period_", 1:5), paste0("cens_hillary_period_", 1:5)) |> 
   convert_cens_to_na(paste0("oud_hillary_period_", 1:5), paste0("cens_hillary_period_", 1:5)) |> 
-  select(BENE_ID, washout_start_dt, msk_diagnosis_dt,
+  select(BENE_ID, washout_start_dt, msk_diagnosis_dt, washout_end_dt, min_opioid_date, exposure_end_dt,
          starts_with("exposure"), 
          starts_with("subset"), 
          starts_with("cens_period"), 
@@ -108,4 +108,5 @@ cohort <-
                                   TRUE ~ oud_hillary_period_5)
          )
 
-write_data(cohort, "inclusion_exclusion_cohort_with_exposure_outcomes.fst")
+write_data(cohort, paste0("inclusion_exclusion_cohort_with_exposure_outcomes", i, ".fst"))
+}

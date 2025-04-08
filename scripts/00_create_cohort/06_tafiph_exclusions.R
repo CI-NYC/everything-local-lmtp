@@ -16,6 +16,8 @@ library(yaml)
 
 source("R/helpers.R")
 
+set.seed(9)
+
 # Source ICD codes from the disability and chronic pain paper
 codes <- read_yaml("data/public/icd_codes.yml")
 

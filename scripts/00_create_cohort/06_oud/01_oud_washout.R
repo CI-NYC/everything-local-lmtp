@@ -29,8 +29,8 @@ nal <- load_data("msk_washout_continuous_enrollment_opioid_requirements_moud_nal
 # - combine MOUD files
 cohort <- 
   list(bup, methadone, nal) |> 
-  map(\(x) fselect(x, BENE_ID, 5)) |> 
-  reduce(join, how = "left") |> 
+  reduce(join, how = "inner") |> 
+  select(BENE_ID, starts_with("moud")) |>
   join(cohort, how = "left")
 
 # - add probable misuse
@@ -72,8 +72,5 @@ cohort <-
 
 # save --------------------------------------------------------------------
 
-write_fst(
-  cohort, 
-  file.path(dir, 
-            "msk_washout_continuous_enrollment_opioid_requirements_oud_exclusion.fst")
-)
+write_data(cohort, "msk_washout_continuous_enrollment_opioid_requirements_oud_exclusion.fst")
+
