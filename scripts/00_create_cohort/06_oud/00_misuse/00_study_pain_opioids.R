@@ -41,7 +41,7 @@ prescribers <-
   select(BENE_ID, CLM_ID, PRSCRBNG_PRVDR_ID, PRSCRBNG_PRVDR_NPI, DSPNSNG_PRVDR_ID, DSPNSNG_PRVDR_NPI, RX_FILL_DT) |>
   inner_join(cohort) |> 
   collect() |> 
-  fsubset(RX_FILL_DT %within% interval(washout_start_dt, exposure_end_dt + 455)) |> 
+  fsubset(RX_FILL_DT %within% interval(washout_start_dt, exposure_period_end_dt + 455)) |> 
   fsubset(CLM_ID %in% opioids$CLM_ID)
 
 opioids <- join(opioids, prescribers, how = "right")

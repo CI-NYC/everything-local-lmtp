@@ -114,7 +114,7 @@ plan(sequential)
 cohort <- 
   "/mnt/general-data/disability/everything-local-lmtp/valid_enrollment_periods" |> 
   list.files(full.names = TRUE) |> 
-  lapply(\(x) read_fst(x, columns = "BENE_ID", as.data.table = TRUE)) |> 
+  lapply(\(x) read_fst(x, columns = c("BENE_ID", "enrollment_start_dt", "enrollment_end_dt"), as.data.table = TRUE)) |> 
   rbindlist()
 
 washout <- merge(washout, cohort)

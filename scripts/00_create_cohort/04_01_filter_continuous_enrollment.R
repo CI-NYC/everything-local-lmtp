@@ -54,3 +54,43 @@ for (i in seq_along(chunks)) {
   )
   saveRDS(tmp[chunks[[i]]], file = file_name)
 }
+
+## POST - EXPOSURE
+
+# Load all dates
+dates <- open_dedts()
+
+dates <- 
+  filter(dates, !is.na(BENE_ID)) |> 
+  select(BENE_ID, ENRLMT_START_DT, ENRLMT_END_DT) |>
+  inner_join(washout, by = "BENE_ID") |> 
+  collect()
+
+setDT(dates, key = "BENE_ID")
+
+dates <- dates[order(rleid(BENE_ID), ENRLMT_START_DT)]
+
+dates <- dates[!is.na(ENRLMT_START_DT) & !is.na(ENRLMT_END_DT)]
+dates <- dates[ENRLMT_END_DT >= min_opioid_date]
+
+idx <- split(seq_len(nrow(dates)), list(dates$BENE_ID))
+tmp <- lapply(idx, \(x) dates[x])
+
+rm(idx, washout, dates)
+gc()
+
+# Define the function to split a list into chunks
+split_list_into_chunks <- function(lst, chunk_size) {
+  split(seq_along(lst), ceiling(seq_along(lst) / chunk_size))
+}
+
+chunks <- split_list_into_chunks(tmp, 1e5)
+
+# Save each chunk to a separate RDS file
+for (i in seq_along(chunks)) {
+  file_name <- paste0(
+    "/mnt/general-data/disability/everything-local-lmtp/tmp_post_exposure/enrollment_period_chunk_post_exposure", 
+    i, ".rds"
+  )
+  saveRDS(tmp[chunks[[i]]], file = file_name)
+}

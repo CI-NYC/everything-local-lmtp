@@ -17,7 +17,7 @@ library(ranger)
 
 drv_root <- "/mnt/general-data/disability/everything-local-lmtp/"
 
-df <- fst::read_fst(paste0(drv_root ,"msk_cohort_clean_imputed.fst")) |>
+df <- fst::read_fst(paste0(drv_root ,"msk_cohort_clean_imputed_7_day_gap.fst")) |>
   as.data.table()
 
 W <- c(
@@ -173,7 +173,7 @@ run_lmtp <- function(data, t, shift, conditional)
 
 # code is run one iteration at a time, match subset with correct shift
 
-for (s in 1:1)
+for (s in c(1:10))
 {
 set.seed(s)
 for(t in 5:5) 
@@ -208,7 +208,7 @@ for(t in 5:5)
           
           finished <- TRUE # if success, mark as finished to exit loop
           
-          saveRDS(results, paste0("/mnt/general-data/disability/everything-local-lmtp/results_final_r1/", shift, "_", subset, "_time_", t, "_seed_", s, ".rds"))
+          saveRDS(results, paste0("/mnt/general-data/disability/everything-local-lmtp/results_final_r1/", shift, "_", subset, "_time_", t, "_seed_", s, "_7_day_gap.rds"))
         }, error = function(e){
           cat("Error on time ", t, ", shift: ", shift, ", subset: ", subset,
               e$message)})
@@ -223,14 +223,14 @@ for(t in 5:5)
 
 results_list <- list()
 
-for (s in 1:10)
+for (s in c(1:10))
 {
-  results_list[[s]] <-1 - readRDS(paste0("/mnt/general-data/disability/everything-local-lmtp/results_final_r1/d3_subset_B8_time_5_seed_", s, ".rds"))$theta
+  results_list[[s]] <- 1 - readRDS(paste0("/mnt/general-data/disability/everything-local-lmtp/results_final_r1/d3_subset_B8_time_5_seed_", s, "_7_day_gap.rds"))$theta
 }
 
 var(unlist(results_list))
 
-pdf("~/everything-local-lmtp/figures/testing_seed.pdf") 
+pdf("~/everything-local-lmtp/figures/testing_seed.pdf")
 
 plot(unlist(results_list),
      xlab = "Seed", ylab = "Estimate")

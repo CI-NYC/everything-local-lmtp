@@ -23,12 +23,12 @@ days_supply <- load_data("exposure_days_supply.fst") # get exposure end dates
 
 cohort <- cohort |>
   left_join(days_supply) |>
-  select(BENE_ID, exposure_end_dt)
+  select(BENE_ID, last_exposure_opioid_dt)
 
 opioids <- load_data("exposure_period_opioids.fst") |>
   left_join(cohort)|>
-  filter(rx_start_dt <= exposure_end_dt) |> # only keeping start date before exposure end period
-  mutate(rx_end_dt = ifelse(exposure_end_dt < rx_end_dt, exposure_end_dt, rx_end_dt)) |> # if rx_end_dt is after exposure end date, then use exposure_end_dt as final date
+  filter(rx_start_dt <= last_exposure_opioid_dt) |> # only keeping start date before episode end period
+  mutate(rx_end_dt = ifelse(last_exposure_opioid_dt < rx_end_dt, last_exposure_opioid_dt, rx_end_dt)) |> # if rx_end_dt is after episode end date, then use last_exposure_opioid_dt as final date
   mutate(rx_end_dt = as.Date(rx_end_dt))
 
 # rewrite over exposure period data
@@ -37,7 +37,7 @@ write_data(opioids, "exposure_period_opioids_ACTUAL.fst")
 setDT(opioids)
 setkey(opioids, BENE_ID)
 
-opioids <- opioids[, .(BENE_ID, min_opioid_date, exposure_end_dt, 
+opioids <- opioids[, .(BENE_ID, min_opioid_date, last_exposure_opioid_dt, 
                        rx_start_dt, rx_end_dt, NDC, opioid, mme_strength_per_day)]
 
 num_opioids <- opioids |>
@@ -56,9 +56,9 @@ calculate_max_daily_dose <- function(data) {
     as.data.table()
   
   to_modify[, .(date = seq(rx_start_dt, rx_end_dt, by = "1 day"), 
-                exposure_end_dt, NDC, opioid, mme_strength_per_day), 
+                last_exposure_opioid_dt, NDC, opioid, mme_strength_per_day), 
             by = .(seq_len(nrow(data)))
-            ][date <= exposure_end_dt, 
+            ][date <= last_exposure_opioid_dt, 
               ][, .(total_mme_strength = sum(mme_strength_per_day, na.rm = TRUE)), 
                 by = .(date)
                 ][, .(exposure_max_daily_dose_mme = max(total_mme_strength))]
@@ -104,16 +104,16 @@ rm(days_supply)
 cohort <- load_data("msk_washout_continuous_enrollment_opioid_requirements.fst")
 
 
-days_supply <- load_data("exposure_days_supply_7_day_gap.fst") # get exposure end dates
+days_supply <- load_data("exposure_days_supply_7_day_gap.fst") # get episode end dates
 
 cohort <- cohort |>
   left_join(days_supply) |>
-  select(BENE_ID, exposure_end_dt)
+  select(BENE_ID, last_exposure_opioid_dt)
 
 opioids <- load_data("exposure_period_opioids.fst") |>
   left_join(cohort)|>
-  filter(rx_start_dt <= exposure_end_dt) |> # only keeping start date before exposure end period
-  mutate(rx_end_dt = ifelse(exposure_end_dt < rx_end_dt, exposure_end_dt, rx_end_dt)) |> # if rx_end_dt is after exposure end date, then use exposure_end_dt as final date
+  filter(rx_start_dt <= last_exposure_opioid_dt) |> # only keeping start date before eouside end period
+  mutate(rx_end_dt = ifelse(last_exposure_opioid_dt < rx_end_dt, last_exposure_opioid_dt, rx_end_dt)) |> # if rx_end_dt is after episode end date, then use last_exposure_opioid_dt as final date
   mutate(rx_end_dt = as.Date(rx_end_dt))
 
 # rewrite over exposure period data
@@ -122,7 +122,7 @@ write_data(opioids, "exposure_period_opioids_7_day_gap_ACTUAL.fst")
 setDT(opioids)
 setkey(opioids, BENE_ID)
 
-opioids <- opioids[, .(BENE_ID, min_opioid_date, exposure_end_dt, 
+opioids <- opioids[, .(BENE_ID, min_opioid_date, last_exposure_opioid_dt, 
                        rx_start_dt, rx_end_dt, NDC, opioid, mme_strength_per_day)]
 
 num_opioids <- opioids |>
@@ -141,9 +141,9 @@ calculate_max_daily_dose <- function(data) {
     as.data.table()
   
   to_modify[, .(date = seq(rx_start_dt, rx_end_dt, by = "1 day"), 
-                exposure_end_dt, NDC, opioid, mme_strength_per_day), 
+                last_exposure_opioid_dt, NDC, opioid, mme_strength_per_day), 
             by = .(seq_len(nrow(data)))
-  ][date <= exposure_end_dt, 
+  ][date <= last_exposure_opioid_dt, 
   ][, .(total_mme_strength = sum(mme_strength_per_day, na.rm = TRUE)), 
     by = .(date)
   ][, .(exposure_max_daily_dose_mme = max(total_mme_strength))]

@@ -18,12 +18,13 @@ source("R/helpers.R")
 
 # load cohort and opioid data
 cohort <- load_data("msk_washout_continuous_enrollment_opioid_requirements.fst")
-opioids <- load_data("exposure_period_opioids.fst")
+opioids <- load_data("exposure_period_opioids.fst") |>
+  mutate(exposure_end_dt = min_opioid_date + 90)
 
 setDT(opioids)
 setkey(opioids, BENE_ID)
 
-opioids <- opioids[, .(BENE_ID, min_opioid_date, exposure_end_dt_possible_latest, 
+opioids <- opioids[, .(BENE_ID, min_opioid_date, exposure_end_dt, 
                        rx_start_dt, rx_end_dt)] |>
   arrange(BENE_ID, rx_start_dt, rx_end_dt) |>
   distinct()
@@ -43,18 +44,18 @@ get_duration <- function(data, gap = 30) {
 
   # all dates with some opioid prescription
   opioid_dates <- to_modify[, .(date = seq(rx_start_dt, rx_end_dt, by = "1 day"), 
-                                exposure_end_dt_possible_latest), 
+                                exposure_end_dt), 
             by = .(seq_len(nrow(to_modify)))
-  ][date <= exposure_end_dt_possible_latest, 
-  ][, exposure_end_dt_possible_latest := NULL][, seq_len := 1] |> distinct()
+  ][date <= exposure_end_dt, 
+  ][, exposure_end_dt := NULL][, seq_len := 1] |> distinct()
   
   # all dates in hypothetical exposure period
-  all_dates_exposure_period <- data[, .(date = seq(min_opioid_date, exposure_end_dt_possible_latest, by = "1 day")), 
+  all_dates_exposure_period <- data[, .(date = seq(min_opioid_date, exposure_end_dt, by = "1 day")), 
             by = .(seq_len(nrow(data)))
   ][seq_len == 1][, seq_len := NULL]
   
   # join opioid dates with all possible dates in exposure period
-  all_dates_exposure_period <- merge(all_dates_exposure_period, opioid_dates, by = "date", all.x = TRUE)[, seq_len := ifelse(is.na(seq_len), 0, seq_len)][date < as.Date("2020-01-01"),] # exposure cannot go past 12-31-2019
+  all_dates_exposure_period <- merge(all_dates_exposure_period, opioid_dates, by = "date", all.x = TRUE)[, seq_len := ifelse(is.na(seq_len), 0, seq_len)]
   
   # get cumulative day sum
   all_dates_exposure_period[, opioid_days := cumsum(seq_len)]
@@ -62,28 +63,28 @@ get_duration <- function(data, gap = 30) {
   # group by instance to identify gaps (anything > 0 indicates a gap of X days)
   all_dates_exposure_period[, num_days_in_gap := .N - 1, by = opioid_days]
   
-  # find FIRST instance of 30+ day gap -- this is the last day of exposure
-  all_dates_exposure_period[, indicator_30_plus_day_gap := as.integer(.I == min(.I[num_days_in_gap > gap])), by = opioid_days]
+  # find FIRST instance of X+ day gap -- this is the last day of exposure
+  all_dates_exposure_period[, indicator_day_plus_day_gap := as.integer(.I == min(.I[num_days_in_gap > gap])), by = opioid_days]
   
-  # if all instances of indicator_30_plus_day_gap are 0, then the last row is returned
-  if (all(all_dates_exposure_period[, indicator_30_plus_day_gap] == 0)) {
+  # if all instances of indicator_day_plus_day_gap are 0, then the last row is returned
+  if (all(all_dates_exposure_period[, indicator_day_plus_day_gap] == 0)) {
     # find the final exposure date
     final_exposure <- all_dates_exposure_period[seq_len == 1, max(date)]
     all_dates_exposure_period <- all_dates_exposure_period[date <= final_exposure]
-    all_dates_exposure_period[.N, indicator_30_plus_day_gap := 1]
+    all_dates_exposure_period[.N, indicator_day_plus_day_gap := 1]
   }
   
   # changing column names
-  setnames(all_dates_exposure_period, old = c("date", "opioid_days"), new = c("exposure_end_dt", "exposure_days_supply"))
+  setnames(all_dates_exposure_period, old = c("date", "opioid_days"), new = c("last_exposure_opioid_dt", "exposure_days_supply"))
   
   # return last exposure date + number of days supplied
-  all_dates_exposure_period <- all_dates_exposure_period[indicator_30_plus_day_gap == 1]
+  all_dates_exposure_period <- all_dates_exposure_period[indicator_day_plus_day_gap == 1]
   
-  # get only first instance of 30 day gap (if multiple)
-  all_dates_exposure_period <- all_dates_exposure_period[exposure_end_dt == min(exposure_end_dt)]
+  # get only first instance of X+ day gap (if multiple)
+  all_dates_exposure_period <- all_dates_exposure_period[last_exposure_opioid_dt == min(last_exposure_opioid_dt)]
   
   # keeping only exposure end date and days' supply
-  all_dates_exposure_period <- all_dates_exposure_period[, .(exposure_end_dt, exposure_days_supply)]
+  all_dates_exposure_period <- all_dates_exposure_period[, .(last_exposure_opioid_dt, exposure_days_supply)]
   
   all_dates_exposure_period
 }

@@ -28,7 +28,7 @@ read_results <- function(t, shift, conditional, path){
                           if(is.null(shift)){
                             NULL} else{
                               "_"},
-                          conditional, "_time_", t, "_7_day_gap.rds")))
+                          conditional, "_time_", t, ".rds")))
 }
 
 combined_results_list <- list()
@@ -38,7 +38,7 @@ density_ratios <- list()
 for(i in c("subset_B1", "subset_B2", "subset_B3", "subset_B4", "subset_B5", "subset_B6", "subset_B7", "subset_B8", 
            "subset_B_under_20", "subset_B_not_risky_days", "subset_B_days_7_dose_under_20"))
 {
-
+  
   results_shift <- list()
   density_shift <- list()
   combined_results_df <- data.frame()
@@ -56,64 +56,64 @@ for(i in c("subset_B1", "subset_B2", "subset_B3", "subset_B4", "subset_B5", "sub
                      i == "subset_B_days_7_dose_under_20" ~ "d3"
   )
   
-for (z in c("obs", shift))
-             
-{
-  results_t <- list()
-  for (j in 1:5)
+  for (z in c("obs", shift))
+    
   {
-    results_t[[j]] <- read_results(as.character(j), as.character(z), as.character(i), path = "results_final_r1") 
-      
-    if(j > 1)
+    results_t <- list()
+    for (j in 1:5)
     {
-    results_t[[j]]$theta <- 1 - results_t[[j]]$theta
-    old_low <- results_t[[j]]$low
-    results_t[[j]]$low <- 1 - results_t[[j]]$high
-    results_t[[j]]$high <- 1 - old_low
+      results_t[[j]] <- read_results(as.character(j), as.character(z), as.character(i), path = "results_final_r1") 
+      
+      if(j > 1)
+      {
+        results_t[[j]]$theta <- 1 - results_t[[j]]$theta
+        old_low <- results_t[[j]]$low
+        results_t[[j]]$low <- 1 - results_t[[j]]$high
+        results_t[[j]]$high <- 1 - old_low
+      }
     }
+    
+    # density ratio summary
+    #density_shift[[z]] <- summary(t(apply(as.matrix(results_t[[5]]$density_ratios),1,cumprod)))
+    density_shift[[z]] <- summary(as.matrix(results_t[[5]]$density_ratios))
+    
+    results_shift[[z]] <- isotonic_projection(results_t)
   }
   
-  # density ratio summary
-  #density_shift[[z]] <- summary(t(apply(as.matrix(results_t[[5]]$density_ratios),1,cumprod)))
-  density_shift[[z]] <- summary(as.matrix(results_t[[5]]$density_ratios))
-
-  results_shift[[z]] <- isotonic_projection(results_t)
-}
-
-tidied_results <- map(results_shift, ~ map_dfr(.x, tidy))
-
-dfobs <- tidied_results[[1]] |>
-  mutate(shift = "obs",
-         t = row_number())
-
-dfshift <- tidied_results[[2]]|>
-  mutate(shift = shift, 
-         t = row_number())
-
-combined_results_df <- dfobs |>
-  merge(dfshift, all = TRUE) |>
-  mutate(shift = factor(shift, levels = c("obs", "d1", "d2", "d3"))) |>
-  distinct() |>
-  arrange(t, shift)
-
-contrast_shift_obs <- map2(results_shift[[2]], results_shift[[1]], ~lmtp_contrast(.x, ref = .y))
-
-
-combined_vals_contrast_shift_obs<- map_dfr(contrast_shift_obs, ~ {
-  data.frame(vals = .x$vals)  
-}) |>
-  mutate(t = row_number())
-
-contrasts_df <- combined_vals_contrast_shift_obs |>
-  mutate(contrast = "shift v. obs") |>
-  arrange(t, contrast)
-
-colnames(contrasts_df) <- gsub("^vals\\.", "", colnames(contrasts_df))
-
-combined_results_list[[i]] <- combined_results_df
-contrast_results_list[[i]] <- contrasts_df
-
-density_ratios[[i]] <- density_shift
+  tidied_results <- map(results_shift, ~ map_dfr(.x, tidy))
+  
+  dfobs <- tidied_results[[1]] |>
+    mutate(shift = "obs",
+           t = row_number())
+  
+  dfshift <- tidied_results[[2]]|>
+    mutate(shift = shift, 
+           t = row_number())
+  
+  combined_results_df <- dfobs |>
+    merge(dfshift, all = TRUE) |>
+    mutate(shift = factor(shift, levels = c("obs", "d1", "d2", "d3"))) |>
+    distinct() |>
+    arrange(t, shift)
+  
+  contrast_shift_obs <- map2(results_shift[[2]], results_shift[[1]], ~lmtp_contrast(.x, ref = .y))
+  
+  
+  combined_vals_contrast_shift_obs<- map_dfr(contrast_shift_obs, ~ {
+    data.frame(vals = .x$vals)  
+  }) |>
+    mutate(t = row_number())
+  
+  contrasts_df <- combined_vals_contrast_shift_obs |>
+    mutate(contrast = "shift v. obs") |>
+    arrange(t, contrast)
+  
+  colnames(contrasts_df) <- gsub("^vals\\.", "", colnames(contrasts_df))
+  
+  combined_results_list[[i]] <- combined_results_df
+  contrast_results_list[[i]] <- contrasts_df
+  
+  density_ratios[[i]] <- density_shift
 }
 
 # reading ATE
@@ -124,17 +124,17 @@ for( d in c("obs", "d1", "d2", "d3"))
   ate_results <- list()
   for (j in 1:5)
   {
-    ate_results[[j]] <- readRDS((paste0("/mnt/general-data/disability/everything-local-lmtp/results_final_r1/", d, "_cohort_time_", j, "_7_day_gap.rds")))
+    ate_results[[j]] <- readRDS((paste0("/mnt/general-data/disability/everything-local-lmtp/results_final_r1/", d, "_cohort_time_", j, ".rds")))
     if (j > 1)
     {
-    ate_results[[j]]$theta <- 1 - ate_results[[j]]$theta
-    old_low <- ate_results[[j]]$low
-    ate_results[[j]]$low <- 1 - ate_results[[j]]$high
-    ate_results[[j]]$high <- 1 - old_low
+      ate_results[[j]]$theta <- 1 - ate_results[[j]]$theta
+      old_low <- ate_results[[j]]$low
+      ate_results[[j]]$low <- 1 - ate_results[[j]]$high
+      ate_results[[j]]$high <- 1 - old_low
     }
   }
   
-
+  
   ate_results_list[[d]] <- isotonic_projection(ate_results)
 }
 tidied_results <- map(ate_results_list, ~ map_dfr(.x, tidy))
@@ -165,7 +165,7 @@ combined_results_df_ATE <- dfobs |>
                            shift == "d1" ~ "d1 (Cohort)",
                            shift == "d2" ~ "d2 (Cohort)",
                            shift == "d3" ~ "d3 (Cohort)"
-                           )
+  )
   )
 
 
@@ -431,9 +431,9 @@ plots_d3 <- ggarrange(results_plot_d3,
                       nrow = 2)
 
 primary_plot_1 <- ggarrange(plots_d1, plots_d2,
-                          align = "h",
-                          font.label = list(size = 10),
-                          nrow = 1) + 
+                            align = "h",
+                            font.label = list(size = 10),
+                            nrow = 1) + 
   annotation_custom(
     grob = grid.lines(x = c(1/2), y = c(0, 1), gp = gpar(col = "black", lwd = 1.5))
   ) +
@@ -442,17 +442,17 @@ primary_plot_1 <- ggarrange(plots_d1, plots_d2,
   )
 
 primary_plot_2 <- ggarrange(plots_d3,
-                          align = "h",
-                          font.label = list(size = 10),
-                          nrow = 1)
+                            align = "h",
+                            font.label = list(size = 10),
+                            nrow = 1)
 primary_plot_1
 
 primary_plot_2
 
-ggsave(plot = primary_plot_1, filename = here::here("figures/primary_figure_final_1.pdf"),
+ggsave(plot = primary_plot_1, filename = here::here("figures/primary_figure_final_1_sens.pdf"),
        width = 12, height = 9, dpi = 300, units = "in")
 
-ggsave(plot = primary_plot_2, filename = here::here("figures/primary_figure_final_2.pdf"),
+ggsave(plot = primary_plot_2, filename = here::here("figures/primary_figure_final_2_sens.pdf"),
        width = 12, height = 9, dpi = 300, units = "in")
 
 # adding ATE
@@ -462,10 +462,9 @@ combined_results_list$cohort <- combined_results_df_ATE |>
                            shift == "d1 (Cohort)" ~ "d1",
                            shift == "d2 (Cohort)" ~ "d2",
                            shift == "d3 (Cohort)" ~ "d3"
-                           ))
+  ))
 
 
-saveRDS(contrast_results_list, here::here("results/primary_contrast_results_list_7_day_gap.rds"))
-saveRDS(combined_results_list, here::here("results/primary_combined_results_list_7_day_gap.rds"))
-
+saveRDS(contrast_results_list, here::here("results/primary_contrast_results_list_7_day_gap_sens.rds"))
+saveRDS(combined_results_list, here::here("results/primary_combined_results_list_7_day_gap_sens.rds"))
 

@@ -33,7 +33,8 @@ write_data(exposures, "exposures_with_subsets.fst")
 cohort <- load_data("msk_washout_continuous_enrollment_opioid_requirements.fst")
 
 cohort <- cohort |>
-  left_join(exposures)
+  left_join(exposures) |>
+  mutate(exposure_period_end_dt = min_opioid_date + 90) # 91 day exposure period
 
 write_data(cohort, "msk_washout_continuous_enrollment_opioid_requirements_with_exposures.fst")
 
@@ -65,6 +66,7 @@ write_data(exposures, "exposures_with_subsets_7_day_gap.fst")
 cohort <- load_data("msk_washout_continuous_enrollment_opioid_requirements.fst")
 
 cohort <- cohort |>
-  left_join(exposures)
+  left_join(exposures) |>
+  mutate(exposure_period_end_dt = min_opioid_date + 90) # 91 day exposure period
 
 write_data(cohort, "msk_washout_continuous_enrollment_opioid_requirements_with_exposures_7_day_gap.fst")

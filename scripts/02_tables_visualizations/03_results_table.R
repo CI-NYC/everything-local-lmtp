@@ -8,8 +8,8 @@ library(tidyverse)
 library(knitr)
 library(kableExtra)
 
-combined_results_list <- readRDS(here::here("results/primary_combined_results_list.rds"))
-contrast_results_list <- readRDS(here::here("results/primary_contrast_results_list.rds"))
+combined_results_list <- readRDS(here::here("results/primary_combined_results_list_7_day_gap.rds"))
+contrast_results_list <- readRDS(here::here("results/primary_contrast_results_list_7_day_gap.rds"))
 
 combined_results_list <- lapply(combined_results_list, function(x) {
   x |> 

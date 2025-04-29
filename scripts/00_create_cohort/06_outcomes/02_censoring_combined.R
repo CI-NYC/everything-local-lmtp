@@ -26,7 +26,7 @@ codes <- read_yaml("data/public/eligibility_codes.yml")
 cohort <- fmutate(
   cohort, 
   period_1 = interval(
-    exposure_end_dt + days(1), exposure_end_dt + days(91)
+    min_opioid_date, exposure_period_end_dt + days(91) # exposure period + period 1
   ), 
   period_2 = interval(
     int_end(period_1) + days(1), int_end(period_1) + days(91)
@@ -82,9 +82,8 @@ age_cens <-
 # date censoring ----------------------------------------------------------
 
 dec_cens <- 
-  fmutate(cohort, cens_date = as.Date("2019-12-31")) |> 
+  fmutate(cohort, cens_date = as.Date("2020-01-01")) |> 
   add_all_periods(cens_date, "dec_cens") |> 
-  select(BENE_ID, starts_with("dec_cens")) |> 
   select(BENE_ID, starts_with("dec_cens"))
 
 # dual eligibility --------------------------------------------------------
@@ -103,7 +102,7 @@ dual_codes <-
 
 dual_cens <- 
   inner_join(cohort, dual_codes) |> 
-  filter(elig_dt %within% interval(exposure_end_dt, exposure_end_dt + days(455))) |> 
+  filter(elig_dt %within% interval(min_opioid_date, exposure_period_end_dt + days(455))) |> 
   group_by(BENE_ID) |>
   arrange(elig_dt) |> 
   filter(row_number() == 1) |> 
@@ -129,7 +128,7 @@ dual_codes2 <-
 
 dual_cens2 <- 
   inner_join(cohort, dual_codes2) |> 
-  filter(elig_dt %within% interval(exposure_end_dt, exposure_end_dt + days(455))) |> 
+  filter(elig_dt %within% interval(min_opioid_date, exposure_period_end_dt + days(455))) |> 
   group_by(BENE_ID) |>
   arrange(elig_dt) |> 
   filter(row_number() == 1) |> 
@@ -140,9 +139,13 @@ dual_cens2 <-
   mutate(across(starts_with("dual_elig2_cens"), replace_na)) |> 
   select(BENE_ID, starts_with("dual_elig2_cens"))
 
+enrollment_cens <- load_data(paste0("all_possible_enrollment_dates/censoring_enrollment", i, ".fst")) |>
+  filter(BENE_ID %in% c(cohort$BENE_ID))
+
 cens <- 
   list(
-    age_cens, 
+    age_cens,
+    enrollment_cens,
     dec_cens, 
     dual_cens, 
     dual_cens2

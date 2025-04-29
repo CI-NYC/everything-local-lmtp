@@ -1,15 +1,16 @@
 
 ### Washout period
 
-- ~~Washout start date: 182 days prior to the first MSK diagnosis~~
+- ~~Washout start date: 182 days prior to the first opioid prescription
+  following initial MSK diagnosis~~
 
-- ~~Washout end date: date of the first MSK diagnosis~~
+- ~~Washout end date: date prior to first opioid prescription~~
 
 ### Exclusion
 
-1.  ~~Exclude all individuals without a minimum of 9 months of
+1.  \~~Exclude all individuals without a minimum of 6 months of
     continuous enrollment. They must be continuously enrolled 6 months
-    prior to the first MSK diagnosis and 3 months after that diagnosis~~
+    prior to the first opioid prescription following MSK diagnosis
 2.  In the washout period:
     1.  ~~any opioid prescription~~
     2.  ~~any OUD diagnosis (using the expansive definition)~~
@@ -32,18 +33,20 @@
     - ~~OTH~~
 
     - ~~DEBSE~~
-9. ~~Palliative care~~
+9.  Long-term care
+10. ~~Palliative care~~
     - ~~OTH~~
 
     - ~~IHP~~
-10. ~~Institutionalized~~
+11. ~~Institutionalized~~
     - ~~DEBSE~~
 
 ### Inclusion
 
 1.  ~~Individuals prescribed an opioid for pain in the period from the
-    first MSK diagnosis to 3-months in the future \[SRVC_BGN_DT,
-    SRVC_BGN_DT + 91\]. Call this the **exposure period.**~~
+    first MSK diagnosis to up to 3-months of continuous use in the
+    future (gap of no more than 30 days, 7 days in sensitivity analysis)
+    Call this the **exposure period.**~~
 
 ### Exposures
 
@@ -51,9 +54,9 @@ In the exposure period, define 2 variables: A1, A2
 
 - ~~A1: MME (max)~~
 
-- ~~A2: days supply (max)~~
+- ~~A2: days supply (continuous use)~~
 
-In addition, define 3 subsets:
+In addition, define multiple subsets e.g.:
 
 1.  ~~B1 = A1 ≥ 50 MME~~
 2.  ~~B2 = A2 \> 7 days~~
@@ -63,7 +66,7 @@ In addition, define 3 subsets:
 
 Discretise follow up time in to 5, 3 month (91 days) intervals for a
 total of 15 months (455 days) of follow up (starting after the exposure
-period?). At each point make a censoring variable and ~~OUD variable~~.
+period). At each point make a censoring variable and ~~OUD variable~~.
 Individuals are censored when:
 
 1)  ~~they turn 65~~
@@ -71,3 +74,5 @@ Individuals are censored when:
 2)  ~~they become dual eligible~~
 
 3)  ~~on December 31, 2019~~
+
+4)  after 15 months of follow up

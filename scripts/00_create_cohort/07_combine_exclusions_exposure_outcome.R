@@ -93,7 +93,7 @@ cohort <-
   convert_cens_to_na(paste0("oud_period_", 1:5), paste0("cens_period_", 1:5)) |> 
   convert_outcome_to_na(paste0("oud_hillary_period_", 1:5), paste0("cens_hillary_period_", 1:5)) |> 
   convert_cens_to_na(paste0("oud_hillary_period_", 1:5), paste0("cens_hillary_period_", 1:5)) |> 
-  select(BENE_ID, washout_start_dt, msk_diagnosis_dt, washout_end_dt, min_opioid_date, exposure_end_dt,
+  select(BENE_ID, washout_start_dt, msk_diagnosis_dt, washout_end_dt, min_opioid_date, last_exposure_opioid_dt, exposure_period_end_dt,
          starts_with("exposure"), 
          starts_with("subset"), 
          starts_with("cens_period"), 

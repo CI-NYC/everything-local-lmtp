@@ -17,7 +17,7 @@ library(ranger)
 
 drv_root <- "/mnt/general-data/disability/everything-local-lmtp/"
 
-df <- fst::read_fst(paste0(drv_root ,"msk_cohort_clean_imputed_7_day_gap.fst")) |>
+df <- fst::read_fst(paste0(drv_root ,"msk_cohort_clean_imputed.fst")) |>
   as.data.table()
 
 W <- c(
@@ -206,7 +206,7 @@ for(t in 1:5)
           
           finished <- TRUE # if success, mark as finished to exit loop
           
-          saveRDS(results, paste0("/mnt/general-data/disability/everything-local-lmtp/results_final_r1/", shift, "_", subset, "_time_", t, "_7_day_gap.rds"))
+          saveRDS(results, paste0("/mnt/general-data/disability/everything-local-lmtp/results_final_r1/", shift, "_", subset, "_time_", t, ".rds"))
         }, error = function(e){
           cat("Error on time ", t, ", shift: ", shift, ", subset: ", subset,
               e$message)})

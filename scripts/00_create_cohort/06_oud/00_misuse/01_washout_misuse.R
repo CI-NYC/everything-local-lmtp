@@ -45,6 +45,7 @@ washout_oud_misuse <-
     exclusion_oud_misuse = as.numeric((score_providers +  score_dispensers + score_days_supply) >= 5)
   ) |> 
   fselect(BENE_ID, exclusion_oud_misuse) |> 
+  filter(exclusion_oud_misuse == 1) |>
   join(cohort, how = "right") |> 
   fmutate(exclusion_oud_misuse = replace_na(exclusion_oud_misuse, 0))
 

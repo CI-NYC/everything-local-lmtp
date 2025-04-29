@@ -21,7 +21,7 @@ library(data.table)
 drv_root <- "/mnt/general-data/disability/everything-local-lmtp/"
 
 
-analysis_cohort <- fst::read_fst(paste0(drv_root ,"msk_cohort_with_MH.fst")) |>
+analysis_cohort <- fst::read_fst(paste0(drv_root ,"msk_cohort_with_MH_7_day_gap.fst")) |>
   as.data.table() |>
   mutate(subset_cohort = TRUE)
 

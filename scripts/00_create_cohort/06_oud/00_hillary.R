@@ -61,7 +61,7 @@ oud_hillary <-
 
 oud_hillary <- 
   inner_join(oud_hillary, cohort) |> 
-  filter(oud_hillary_dt %within% interval(washout_start_dt, exposure_end_dt + 455))
+  filter(oud_hillary_dt %within% interval(washout_start_dt, exposure_period_end_dt + 455))
 
 write_data(oud_hillary, paste0("msk_washout_continuous_enrollment_opioid_requirements_oud_hillary_dts", i, ".fst"))
 }
